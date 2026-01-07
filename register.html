@@ -7,19 +7,19 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Helvetica Neue',sans-serif;background:#000;color:#fff;min-height:100vh;padding:100px 40px;
-      background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+    body{font-family:'Helvetica Neue',sans-serif;background:#fff;color:#000;min-height:100vh;padding:100px 40px;
+      background-image:linear-gradient(rgba(0,0,0,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.02) 1px,transparent 1px);
       background-size:40px 40px;position:relative}
-    body::before{content:"";position:fixed;inset:0;background:linear-gradient(#111 2px,transparent 2px),linear-gradient(90deg,#111 2px,transparent 2px);background-size:120px 120px;opacity:0.3;pointer-events:none}
+    body::before{content:"";position:fixed;inset:0;background:linear-gradient(#ccc 2px,transparent 2px),linear-gradient(90deg,#ccc 2px,transparent 2px);background-size:120px 120px;opacity:0.4;pointer-events:none}
     h1{font-size:140px;font-weight:900;text-transform:uppercase;letter-spacing:-10px;line-height:0.8;margin-bottom:100px}
-    .box{max-width:600px;margin:0 auto;background:rgba(255,255,255,0.02);padding:120px 80px;border:2px solid rgba(255,255,255,0.2 2);position:relative}
-    .box::before{content:"“";position:absolute;top:-60px;left:40px;font-size:300px;opacity:0.08}
-    .box::after{content:"”";position:absolute;bottom:-80px;right:40px;font-size:300px;opacity:0.08}
-    input{width:100%;padding:30px 0;background:none;border:none;border-bottom:3px solid #333;color:#fff;font-size:22px;margin:50px 0;outline:none}
-    input:focus{border-color:#fff}
-    button{width:100%;padding:28px;background:#fff;color:#000;font-weight:900;font-size:20px;text-transform:uppercase;letter-spacing:5px;border:none;cursor:pointer}
+    .box{max-width:600px;margin:0 auto;background:rgba(0,0,0,0.02);padding:120px 80px;border:3px solid #000;position:relative}
+    .box::before{content:"“";position:absolute;top:-60px;left:40px;font-size:300px;opacity:0.1}
+    .box::after{content:"”";position:absolute;bottom:-80px;right:40px;font-size:300px;opacity:0.1}
+    input{width:100%;padding:30px 0;background:none;border:none;border-bottom:3px solid #999;color:#000;font-size:22px;margin:50px 0;outline:none}
+    input:focus{border-color:#000}
+    button{width:100%;padding:28px;background:#000;color:#fff;font-weight:900;font-size:20px;text-transform:uppercase;letter-spacing:5px;border:none;cursor:pointer}
     button:hover{background:#ff0000;color:#fff}
-    .footer{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:10px;opacity:0.4}
+    a{color:#000;text-decoration:underline}
   </style>
 </head>
 <body>
@@ -31,68 +31,29 @@
     <input type="password" id="password" placeholder="PASSWORD">
     <button onclick="register()">CREATE ACCOUNT</button>
     <p style="text-align:center;margin-top:50px;opacity:0.6;font-size:14px">
-      ALREADY HAVE ACCOUNT? <a href="login.html" style="color:#fff;text-decoration:underline">LOGIN</a>
+      ALREADY HAVE ACCOUNT? <a href="login.html">LOGIN</a>
     </p>
   </div>
-
-  <div style="margin-top:200px; text-align:center; font-size:12px; letter-spacing:8px; opacity:0.4; padding:40px 0; border-top:1px solid #333;">
-    SN SUB UMUM ©2026 – ALL RIGHTS RESERVED
+  <div style="margin-top:200px;text-align:center;font-size:12px;letter-spacing:8px;opacity:0.5;padding:40px 0;border-top:1px solid #ccc">
+    SNSU BUMUM JAYA © 2025 – ALL RIGHTS RESERVED
   </div>
 
-<script>
-  firebase.initializeApp({
-    apiKey: "AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",
-    authDomain: "inventariskomputer.firebaseapp.com",
-    databaseURL: "https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "inventariskomputer",
-    storageBucket: "inventariskomputer.firebasestorage.app",
-    messagingSenderId: "915927761008",
-    appId: "1:915927761008:web:a4b2e71159d00501fdf4b5"
-  });
-
-  const auth = firebase.auth();   // <<< INI YANG BENAR!!!
-  const db = firebase.database();
-
-  function register() {
-    const nama = document.getElementById('nama').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const pass = document.getElementById('password').value;
-
-    if (!nama || !email || !pass) {
-      alert("ISI SEMUA FIELD BRO!");
-      return;
+  <script>
+    firebase.initializeApp({apiKey:"AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",authDomain:"inventariskomputer.firebaseapp.com",databaseURL:"https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inventariskomputer",storageBucket:"inventariskomputer.firebasestorage.app",messagingSenderId:"915927761008",appId:"1:915927761008:web:a4b2e71159d00501fdf4b5"});
+    const auth = firebase.auth(); const db = firebase.database();
+    function register(){
+      const nama = document.getElementById('nama').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const pass = document.getElementById('password').value;
+      if(!nama||!email||!pass)return alert("ISI SEMUA FIELD!");
+      db.ref('users').once('value').then(s=>{
+        const pertama = !s.exists();
+        auth.createUserWithEmailAndPassword(email,pass)
+          .then(c=>db.ref('users/'+c.user.uid).set({nama,email,role:pertama?'admin':'staff',createdAt:new Date().toISOString()}))
+          .then(()=>{alert(pertama?"KAMU ADMIN PERTAMA BRO 🔥":"AKUN DIBUAT – STAFF");location.href="login.html"})
+          .catch(e=>alert(e.message));
+      });
     }
-
-    // Cek apakah ini akun pertama
-    db.ref('users').once('value').then(snapshot => {
-      const pertamaKali = !snapshot.exists();   // true = belum ada user sama sekali
-
-      auth.createUserWithEmailAndPassword(email, pass)
-        .then(cred => {
-          const role = pertamaKali ? 'admin' : 'staff';
-
-          return db.ref('users/' + cred.user.uid).set({
-            nama: nama,
-            email: email,
-            role: role,
-            createdAt: new Date().toISOString()
-          });
-        })
-        .then(() => {
-          alert(pertamaKali 
-            ? "SELAMAT BRO! KAMU ADMIN PERTAMA SISTEM 🔥👑" 
-            : "AKUN BERHASIL DIBUAT – KAMU STAFF"
-          );
-          location.href = "login.html";
-        })
-        .catch(err => {
-          console.error(err);
-          alert("GAGAL DAFTAR: " + err.message);
-        });
-    }).catch(err => {
-      alert("ERROR CEK DATABASE: " + err.message);
-    });
-  }
-</script>
+  </script>
 </body>
 </html>
