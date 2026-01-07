@@ -1,85 +1,29 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Inventaris Komputer</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    body{font-family:Arial;background:#f0f2f5;margin:0;display:flex;height:100vh;align-items:center;justify-content:center}
+    .box{background:white;padding:40px 30px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);width:90%;max-width:400px}
+    input,button{display:block;width:100%;padding:14px;margin:10px 0;border-radius:8px;border:1px solid #ddd;font-size:16px}
+    button{background:#007bff;color:white;border:none;cursor:pointer}
+    button:hover{background:#0056b3}
+    h1{text-align:center;color:#333}
+    a{color:#007bff;text-decoration:none}
+  </style>
 </head>
 <body>
-  <header class="container">
-    <h1>Inventaris Komputer</h1>
-    <p class="muted">Login / Register</p>
-  </header>
+  <div class="box">
+    <h1>Login Inventaris</h1>
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button onclick="login()">Login</button>
+    <p style="text-align:center">Belum punya akun? <a href="register.html">Register</a></p>
+    <p id="msg" style="color:red;text-align:center"></p>
+  </div>
 
-  <main class="container">
-    <section class="card">
-      <div class="row space">
-        <h2>Akun</h2>
-        <a class="link" href="./index.html">Ke Inventaris</a>
-      </div>
-
-      <p id="notice" class="muted"></p>
-
-      <div class="row">
-        <button id="tabLogin" class="secondary">Login</button>
-        <button id="tabRegister" class="secondary">Register</button>
-      </div>
-
-      <div id="panelLogin" class="panel">
-        <h3>Login</h3>
-        <div class="grid2">
-          <label>Email
-            <input id="loginEmail" type="email" autocomplete="username" placeholder="nama@contoh.com">
-          </label>
-          <label>Password
-            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••">
-          </label>
-        </div>
-        <div class="row">
-          <button id="btnLogin">Login</button>
-          <button id="btnLogout" class="secondary" disabled>Logout</button>
-          <span id="authStatus" class="muted"></span>
-        </div>
-      </div>
-
-      <div id="panelRegister" class="panel" hidden>
-        <h3>Register</h3>
-        <div class="grid3">
-          <label>Email
-            <input id="regEmail" type="email" autocomplete="username" placeholder="nama@contoh.com">
-          </label>
-          <label>Password
-            <input id="regPassword" type="password" autocomplete="new-password" placeholder="min 6 karakter">
-          </label>
-          <label>Ulangi Password
-            <input id="regPassword2" type="password" autocomplete="new-password" placeholder="ulang">
-          </label>
-        </div>
-
-        <div class="row">
-          <button id="btnRegister">Buat Akun</button>
-          <span id="regStatus" class="muted"></span>
-        </div>
-      </div>
-
-      <div class="card subtle" id="uidBox" hidden>
-        <div class="row space">
-          <strong>UID kamu</strong>
-          <button id="btnCopyUid" class="secondary" type="button">Copy</button>
-        </div>
-        <code id="uidText"></code>
-        <p class="muted small">
-          Berikan UID ini ke admin agar dimasukkan ke <code>/staff</code> (read-only) atau <code>/admins</code>.
-        </p>
-      </div>
-    </section>
-  </main>
-
-  <footer class="container muted small">
-    Firebase Authentication (Email/Password).
-  </footer>
-
-  <script type="module" src="./login.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
