@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SN SUB UMUM — INVENTORY 2026</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;margin:0;overflow:hidden}
+    body{
+      font-family:'Helvetica Neue',sans-serif;background:#fff;color:#000;
+      background-image:
+        linear-gradient(rgba(0,0,0,.02) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,0,0,.02) 1px,transparent 1px);
+      background-size:60px 60px;
+      position:relative;
+    }
+    body::before{
+      content:"";position:fixed;inset:0;
+      background:linear-gradient(#ccc 3px,transparent 3px),linear-gradient(90deg,#ccc 3px,transparent 3px);
+      background-size:180px 180px;opacity:0.7;pointer-events:none;z-index:1;
+    }
+
+    /* SIDEBAR KIRI — BRUTAL INDUSTRIAL */
+    .sidebar{
+      position:fixed;left:0;top:0;bottom:0;width:380px;background:#000;color:#fff;
+      padding:80px 60px;z-index:999;box-shadow:30px 0 60px rgba(0,0,0,0.3);
+      border-right:8px solid #000;
+    }
+    .sidebar h1{
+      font-size:68px;font-weight:900;letter-spacing:-6px;line-height:0.85;margin-bottom:120px;
+    }
+    .menu-item{
+      font-size:28px;font-weight:900;letter-spacing:-1px;margin:50px 0;cursor:pointer;
+      transition:all .4s;opacity:0.7;position:relative;padding-left:30px;
+    }
+    .menu-item::before{
+      content:"";position:absolute;left:0;top:50%;width:0;height:6px;background:#fff;
+      transition:all .4s;transform:translateY(-50%);
+    }
+    .menu-item:hover,.menu-item.active{
+      opacity:1;padding-left:50px;
+    }
+    .menu-item:hover::before,.menu-item.active::before{width:40px}
+    .admin-only{color:#ff0000}
+
+    /* MAIN CONTENT */
+    .main{
+      margin-left:380px;padding:100px 100px 300px;min-height:100vh;position:relative;z-index:2;
+    }
+    .content{display:none}
+    .content.active{display:block}
+    h2{font-size:140px;font-weight:900;letter-spacing:-10px;line-height:0.8;margin-bottom:100px}
+
+    /* TABLE */
+    table{width:100%;border-collapse:separate;border-spacing:0 40px}
+    th{text-align:left;font-size:15px;letter-spacing:10px;text-transform:uppercase;opacity:0.7;padding-bottom:40px}
+    td{padding:40px 0;border-bottom:5px solid #000;font-size:26px;font-weight:300}
+
+    /* FORM */
+    .form-box{
+      max-width:900px;background:rgba(0,0,0,0.03);padding:120px 100px;border:6px solid #000;margin:100px 0;
+    }
+    .form-box input{
+      width:100%;padding:40px 0;background:none;border:none;border-bottom:5px solid #000;
+      font-size:28px;margin:60px 0;outline:none;
+    }
+
+    /* BUTTONS */
+    .btn{
+      padding:25px 70px;background:#000;color:#fff;font-size:20px;font-weight:900;
+      letter-spacing:6px;border:none;cursor:pointer;margin-right:30px;transition:.4s
+    }
+    .btn:hover{background:#ff0000}
+    .btn-cancel{
+      background:none;border:5px solid #000;padding:25px 70px;font-size:20px;font-weight:900;
+      letter-spacing:6px;cursor:pointer
+    }
+
+    /* USER INFO */
+    .user-info{
+      position:fixed;right:80px;top:80px;font-size:15px;letter-spacing:8px;opacity:0.8;
+      background:#fff;padding:10px 20px;z-index:10
+    }
+    .logout{
+      margin-left:50px;background:none;border:4px solid #000;padding:15px 40px;
+      font-size:14px;font-weight:900;letter-spacing:6px;cursor:pointer;transition:.3s
+    }
+    .logout:hover{background:#000;color:#fff}
+
+    /* FOOTER 2026 — GILA BANGET */
+    .footer{
+      position:fixed;bottom:0;left:0;right:0;background:#000;color:#fff;
+      padding:50px 100px;text-align:center;font-size:16px;letter-spacing:18px;
+      font-weight:900;border-top:10px solid #fff;z-index:999
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h1>INVENTARIS<br>KOMPUTER</h1>
+    <div class="menu-item active" onclick="showPage('home')">HOME</div>
+    <div class="menu-item" onclick="showPage('assets')">SEMUA ASSET</div>
+    <div class="menu-item admin-only" id="menuAdd" onclick="showPage('add')">+ TAMBAH BARANG</div>
+    <div class="menu-item" onclick="alert('COMING SOON 2026')">RUSAK / HILANG</div>
+    <div class="menu-item admin-only" id="menuReport" onclick="alert('EXPORT PDF — 2026')">EXPORT PDF</div>
+  </div>
+
+  <!-- USER INFO -->
+  <div class="user-info">
+    <span id="userInfo">LOADING...</span>
+    <button class="logout" onclick="firebase.auth().signOut().then(()=>location.href='login.html')">LOGOUT</button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- HOME -->
+    <div id="home" class="content active">
+      <h2>DASHBOARD<br>2026</h2>
+      <p style="font-size:32px;opacity:0.7;letter-spacing:2px;line-height:1.8;max-width:900px">
+        SELAMAT DATANG DI SISTEM INVENTARIS TERBAIK<br>
+        SN SUB UMUM — TAHUN 2026<br><br>
+        KLIK MENU DI SEBELAH KIRI UNTUK MULAI
+      </p>
+    </div>
+
+    <!-- SEMUA ASSET -->
+    <div id="assets" class="content">
+      <h2>SEMUA<br>ASSET</h2>
+      <table>
+        <thead><tr><th>CODE</th><th>BRAND</th><th>MODEL</th><th>LOCATION</th><th>STATUS</th><th id="aksiHeader" style="display:none">ACTION</th></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- TAMBAH / EDIT -->
+    <div id="add" class="content">
+      <h2 id="formTitle">TAMBAH<br>BARANG</h2>
+      <div class="form-box">
+        <input type="text" id="kode" placeholder="KODE ASSET">
+        <input type="text" id="merk" placeholder="MERK">
+        <input type="text" id="tipe" placeholder="TIPE / SPESIFIKASI">
+        <input type="text" id="lokasi" placeholder="LOKASI">
+        <input type="text" id="status" placeholder="STATUS" value="OPERATIONAL">
+        <br><br>
+        <button class="btn" onclick="saveData()">SIMPAN</button>
+        <button class="btn btn-cancel" onclick="showPage('home')">BATAL</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER 2026 — GILA BANGET -->
+  <div class="footer">
+    SN SUB UMUM – INTERNAL INVENTORY SYSTEM 2026
+  </div>
+
+  <script>
+    firebase.initializeApp({apiKey:"AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",authDomain:"inventariskomputer.firebaseapp.com",databaseURL:"https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inventariskomputer",storageBucket:"inventariskomputer.firebasestorage.app",messagingSenderId:"915927761008",appId:"1:915927761008:web:a4b2e71159d00501fdf4b5"});
+    const auth=firebase.auth();const db=firebase.database();let role='staff',ek=null;
+
+    auth.onAuthStateChanged(u=>{
+      if(!u) return location.href="login.html";
+      db.ref('users/'+u.uid).once('value').then(s=>{
+        const d=s.val();role=d.role||'staff';
+        document.getElementById('userInfo').innerText = d.nama + " – " + role.toUpperCase();
+        if(role==='admin'){
+          document.getElementById('menuAdd').style.display='block';
+          document.getElementById('menuReport').style.display='block';
+          document.getElementById('aksiHeader').style.display='table-cell';
+        }
+      });
+    });
+
+    function showPage(page){
+      document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
+      document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
+      document.querySelector(`.menu-item[onclick="showPage('${page}')"]`).classList.add('active');
+      
+      if(page==='assets') loadTable();
+      if(page==='add'){ek=null;document.getElementById('formTitle').innerText='TAMBAH\nBARANG';clearForm();}
+    }
+
+    function loadTable(){
+      db.ref('inventaris').on('value',s=>{
+        const t=document.getElementById('tableBody');t.innerHTML='';
+        if(!s.exists()){t.innerHTML='<tr><td colspan="6" style="text-align:center;padding:200px 0;font-size:32px;opacity:0.4">BELUM ADA DATA</td></tr>';return;}
+        s.forEach(c=>{
+          const i=c.val();const k=c.key;
+          const r=document.createElement('tr');
+          r.innerHTML=`<td>${i.kode||'-'}</td><td>${i.merk||'-'}</td><td>${i.tipe||'-'}</td><td>${i.lokasi||'-'}</td><td>${i.status||'-'}</td>
+            <td style="display:${role==='admin'?'':'none'}">
+              <button class="btn" style="padding:20px 40px;margin-right:20px" onclick="edit('${k}',${JSON.stringify(i)})">EDIT</button>
+              <button class="btn" style="background:#ff0000;padding:20px 40px" onclick="if(confirm('HAPUS PERMANEN?'))db.ref('inventaris/${k}').remove()">DELETE</button>
+            </td>`;
+          t.appendChild(r);
+        });
+      });
+    }
+
+    function edit(k,i){
+      ek=k;showPage('add');
+      document.getElementById('formTitle').innerText='EDIT\nDATA';
+      document.getElementById('kode').value=i.kode||'';
+      document.getElementById('merk').value=i.merk||'';
+      document.getElementById('tipe').value=i.tipe||'';
+      document.getElementById('lokasi').value=i.lokasi||'';
+      document.getElementById('status').value=i.status||'';
+    }
+
+    function clearForm(){
+      document.getElementById('kode').value='';
+      document.getElementById('merk').value='';
+      document.getElementById('tipe').value='';
+      document.getElementById('lokasi').value='';
+      document.getElementById('status').value='OPERATIONAL';
+    }
+
+    function saveData(){
+      if(role!=='admin')return alert('ONLY ADMIN');
+      const d={
+        kode:document.getElementById('kode').value.trim(),
+        merk:document.getElementById('merk').value.trim(),
+        tipe:document.getElementById('tipe').value.trim(),
+        lokasi:document.getElementById('lokasi').value.trim(),
+        status:document.getElementById('status').value.trim()
+      };
+      if(!d.kode||!d.merk)return alert('KODE & MERK HARUS DIISI');
+      const k=ek||Date.now();
+      db.ref('inventaris/'+k).set(d).then(()=>{
+        alert("DATA TERSIMPAN!");
+        showPage('assets');
+      });
+    }
+  </script>
+</body>
+</html>
