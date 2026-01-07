@@ -104,8 +104,11 @@
     /* KELOLA KATEGORI */
     .kategori-list{margin-top:50px}
     .kategori-item{
-      display:flex;align-items:center;justify-content:space-between;padding:15px 0;
-      border-bottom:2px solid #000;font-size:18px;
+      display:flex;align-items:center;justify-content:space-between;padding:20px 0;
+      border-bottom:2px solid #ccc;font-size:18px;
+    }
+    .kategori-item input{
+      width:60%;padding:10px;font-size:18px;border:2px solid #000;background:none;
     }
   </style>
 </head>
@@ -164,7 +167,7 @@
       </div>
     </div>
 
-    <!-- KELOLA KATEGORI -->
+    <!-- KELOLA KATEGORI — SEKARANG BISA TAMBAH, EDIT, HAPUS LANGSUNG -->
     <div id="kategori" class="content">
       <h2>KELOLA<br>KATEGORI</h2>
       <div class="form-box">
@@ -172,7 +175,7 @@
         <button class="btn" onclick="tambahKategori()">+ TAMBAH KATEGORI</button>
       </div>
       <div class="kategori-list" id="daftarKategori">
-        <!-- ISI OTOMATIS -->
+        <!-- DIISI OTOMATIS DARI FIREBASE -->
       </div>
     </div>
 
@@ -186,7 +189,7 @@
     firebase.initializeApp({apiKey:"AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",authDomain:"inventariskomputer.firebaseapp.com",databaseURL:"https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inventariskomputer",storageBucket:"inventariskomputer.firebasestorage.app",messagingSenderId:"915927761008",appId:"1:915927761008:web:a4b2e71159d00501fdf4b5"});
     const auth=firebase.auth();const db=firebase.database();let role='staff',ek=null;
 
-    // DEFAULT KATEGORI (otomatis masuk kalau database kosong)
+    // Default kategori kalau kosong
     const defaultKategori = ["Laptop","PC Desktop","Monitor","Printer","Aksesoris","Jaringan","Lainnya"];
 
     auth.onAuthStateChanged(u=>{
@@ -202,50 +205,49 @@
       });
     });
 
-    // LOAD KATEGORI + BUAT DEFAULT KALAU KOSONG
+    // LOAD KATEGORI + BUAT DEFAULT KALAU BELUM ADA
     function loadKategori(){
       const select = document.getElementById('kategori');
       const list = document.getElementById('daftarKategori');
-      
+
       db.ref('kategori').once('value').then(snap=>{
-        let data = snap.val();
-        
-        // Kalau kosong, isi default
-        if(!data || Object.keys(data).length === 0){
+        if(!snap.exists()){
+          // Buat default kategori kalau database kosong
           defaultKategori.forEach(nama=>{
-            db.ref('kategori').push({nama});
+            db.ref('kategori').push({nama: nama});
           });
         }
 
-        // Kosongkan dulu
-        select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
-        list.innerHTML = '<p style="opacity:0.5">Loading kategori...</p>';
-
-        // Load real-time
-        db.ref('kategori').on('value', snap2=>{
-          const data2 = snap2.val() || {};
+        // Update dropdown dan list secara real-time
+        db.ref('kategori').on('value', snap=>{
+          const data = snap.val() || {};
           select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
           list.innerHTML = '';
-          
-          Object.keys(data2).forEach(key=>{
-            const nama = data2[key].nama;
+
+          Object.keys(data).forEach(key=>{
+            const nama = data[key].nama;
+
             // Dropdown
             const opt = document.createElement('option');
-            opt.value = nama; opt.textContent = nama.toUpperCase();
+            opt.value = nama;
+            opt.textContent = nama;
             select.appendChild(opt);
-            
-            // List kelola kategori
+
+            // List kelola kategori dengan tombol edit & hapus
             const div = document.createElement('div');
             div.className = 'kategori-item';
             div.innerHTML = `
-              <span>${nama.toUpperCase()}</span>
+              <div>
+                <input type="text" value="${nama}" id="edit-${key}" style="width:70%">
+                <button class="btn btn-small" onclick="updateKategori('${key}', document.getElementById('edit-${key}').value)">UPDATE</button>
+              </div>
               <button class="btn btn-small" style="background:#ff0000" onclick="hapusKategori('${key}')">HAPUS</button>
             `;
             list.appendChild(div);
           });
-          
-          if(Object.keys(data2).length === 0){
-            list.innerHTML = '<p style="opacity:0.5">Belum ada kategori. Tambah di atas!</p>';
+
+          if(Object.keys(data).length === 0){
+            list.innerHTML = '<p style="opacity:0.5;text-align:center;padding:50px">Belum ada kategori. Tambah satu!</p>';
           }
         });
       });
@@ -254,17 +256,30 @@
     function tambahKategori(){
       const nama = document.getElementById('newKategori').value.trim();
       if(!nama) return alert('Isi nama kategori!');
-      db.ref('kategori').push({nama}).then(()=>{
-        alert('Kategori "'+nama+'" ditambahkan!');
+      if(nama.length < 2) return alert('Nama terlalu pendek!');
+      
+      db.ref('kategori').push({nama: nama}).then(()=>{
+        alert('Kategori "' + nama + '" berhasil ditambahkan!');
         document.getElementById('newKategori').value = '';
+      }).catch(err=>alert('Error: ' + err.message));
+    }
+
+    function updateKategori(key, newNama){
+      if(!newNama.trim()) return alert('Nama tidak boleh kosong!');
+      db.ref('kategori/' + key).update({nama: newNama.trim()}).then(()=>{
+        alert('Kategori diperbarui!');
       });
     }
 
     function hapusKategori(key){
-      if(confirm('Hapus kategori ini?')){
-        db.ref('kategori/'+key).remove();
+      if(confirm('Yakin hapus kategori ini? Semua barang akan jadi kategori "LAINNYA"')){
+        db.ref('kategori/' + key).remove().then(()=>{
+          alert('Kategori dihapus!');
+        });
       }
     }
+
+    // ... (fungsi showPage, loadTable, saveData, edit, dll tetap sama seperti sebelumnya)
 
     function showPage(p){
       document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
@@ -332,7 +347,7 @@
       db.ref('inventaris/'+k).set(d).then(()=>{alert('SAVED');showPage('assets');});
     }
 
-    // Load kategori saat halaman dibuka
+    // Jalankan saat halaman dibuka
     loadKategori();
   </script>
 </body>
