@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inventaris Komputer</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="container">
+    <h1>Inventaris Komputer</h1>
+    <p class="muted">GitHub Pages + Firebase Realtime Database</p>
+  </header>
+
+  <main class="container">
+    <!-- Login -->
+    <section class="card" id="authCard">
+      <h2>Login Admin</h2>
+      <div class="grid2">
+        <label>
+          Email
+          <input id="email" type="email" autocomplete="username" placeholder="admin@contoh.com">
+        </label>
+        <label>
+          Password
+          <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+        </label>
+      </div>
+      <div class="row">
+        <button id="btnLogin">Login</button>
+        <button id="btnLogout" class="secondary" disabled>Logout</button>
+        <span id="authStatus" class="muted"></span>
+      </div>
+      <p class="muted small">
+        Data inventaris harus dilindungi oleh Firebase Authentication + Security Rules.
+      </p>
+    </section>
+
+    <!-- Form input -->
+    <section class="card" id="formCard" hidden>
+      <h2>Tambah / Edit Komputer</h2>
+
+      <form id="computerForm">
+        <input type="hidden" id="editingId" value="">
+
+        <div class="grid3">
+          <label>Asset Tag
+            <input id="assetTag" required placeholder="PC-001">
+          </label>
+          <label>Hostname
+            <input id="hostname" placeholder="OFFICE-PC-01">
+          </label>
+          <label>Status
+            <select id="status">
+              <option>In Use</option>
+              <option>Spare</option>
+              <option>Repair</option>
+              <option>Retired</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid3">
+          <label>User
+            <input id="user" placeholder="Nama pemakai">
+          </label>
+          <label>Departemen
+            <input id="department" placeholder="Finance / IT / ...">
+          </label>
+          <label>Lokasi
+            <input id="location" placeholder="Lantai / Ruangan">
+          </label>
+        </div>
+
+        <div class="grid3">
+          <label>CPU
+            <input id="cpu" placeholder="Intel i5 / Ryzen 5">
+          </label>
+          <label>RAM
+            <input id="ram" placeholder="16 GB">
+          </label>
+          <label>Storage
+            <input id="storage" placeholder="512 GB SSD">
+          </label>
+        </div>
+
+        <div class="grid3">
+          <label>OS
+            <input id="os" placeholder="Windows 11 / Ubuntu">
+          </label>
+          <label>IP Address
+            <input id="ip" placeholder="192.168.1.10">
+          </label>
+          <label>Catatan
+            <input id="notes" placeholder="opsional">
+          </label>
+        </div>
+
+        <div class="row">
+          <button type="submit" id="btnSave">Simpan</button>
+          <button type="button" id="btnCancel" class="secondary" hidden>Batal Edit</button>
+          <span id="formMsg" class="muted"></span>
+        </div>
+      </form>
+    </section>
+
+    <!-- List -->
+    <section class="card" id="listCard" hidden>
+      <div class="row space">
+        <h2>Daftar Komputer</h2>
+        <input id="search" placeholder="Cari assetTag / hostname / user..." />
+      </div>
+
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Hostname</th>
+              <th>User</th>
+              <th>Dept</th>
+              <th>Lokasi</th>
+              <th>Status</th>
+              <th>Spesifikasi</th>
+              <th>IP</th>
+              <th>Update</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="10" class="muted">Belum ada data.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container muted small">
+    Dibuat dengan Firebase Realtime Database + GitHub Pages.
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
