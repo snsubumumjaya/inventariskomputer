@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - Inventaris Komputer</title>
+  <title>Login</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <style>
-    body{font-family:Arial;background:#f0f2f5;margin:0;display:flex;height:100vh;align-items:center;justify-content:center}
-    .box{background:white;padding:40px 30px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);width:90%;max-width:400px}
-    input,button{display:block;width:100%;padding:14px;margin:10px 0;border-radius:8px;border:1px solid #ddd;font-size:16px}
-    button{background:#007bff;color:white;border:none;cursor:pointer}
-    button:hover{background:#0056b3}
-    h1{text-align:center;color:#333}
-    a{color:#007bff;text-decoration:none}
+    body{background:#f0f2f5;display:flex;height:100vh;align-items:center;justify-content:center;margin:0;font-family:Arial}
+    .box{background:white;padding:40px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);width:90%;max-width:400px}
+    input,button{width:100%;padding:14px;margin:10px 0;border-radius:8px;border:1px solid #ddd;font-size:16px}
+    button{background:#1877f2;color:white;border:none;cursor:pointer}
+    button:hover{background:#166fe5}
   </style>
 </head>
 <body>
   <div class="box">
-    <h1>Login Inventaris</h1>
+    <h2 style="text-align:center">Login Inventaris</h2>
     <input type="email" id="email" placeholder="Email" required />
     <input type="password" id="password" placeholder="Password" required />
     <button onclick="login()">Login</button>
@@ -24,6 +24,28 @@
     <p id="msg" style="color:red;text-align:center"></p>
   </div>
 
-  <script type="module" src="script.mjs"></script>
+  <script>
+    const firebaseConfig = { /* sama seperti di atas */ 
+      apiKey: "AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",
+      authDomain: "inventariskomputer.firebaseapp.com",
+      databaseURL: "https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inventariskomputer",
+      storageBucket: "inventariskomputer.firebasestorage.app",
+      messagingSenderId: "915927761008",
+      appId: "1:915927761008:web:a4b2e71159d00501fdf4b5"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function login() {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(() => location.href = "dashboard.html")
+        .catch(e => document.getElementById('msg').innerText = e.message);
+    }
+
+    auth.onAuthStateChanged(user => { if (user) location.href = "dashboard.html"; });
+  </script>
 </body>
 </html>
