@@ -19,6 +19,8 @@
         <a class="link" href="./index.html">Ke Inventaris</a>
       </div>
 
+      <p id="notice" class="muted"></p>
+
       <div class="row">
         <button id="tabLogin" class="secondary">Login</button>
         <button id="tabRegister" class="secondary">Register</button>
@@ -59,17 +61,17 @@
           <button id="btnRegister">Buat Akun</button>
           <span id="regStatus" class="muted"></span>
         </div>
+      </div>
 
-        <div class="card subtle" id="uidBox" hidden>
-          <div class="row space">
-            <strong>UID kamu</strong>
-            <button id="btnCopyUid" class="secondary" type="button">Copy</button>
-          </div>
-          <code id="uidText"></code>
-          <p class="muted small">
-            Akun baru biasanya belum punya akses. Berikan UID ini ke admin agar dimasukkan ke <code>/staff</code> (read-only) atau <code>/admins</code>.
-          </p>
+      <div class="card subtle" id="uidBox" hidden>
+        <div class="row space">
+          <strong>UID kamu</strong>
+          <button id="btnCopyUid" class="secondary" type="button">Copy</button>
         </div>
+        <code id="uidText"></code>
+        <p class="muted small">
+          Berikan UID ini ke admin agar dimasukkan ke <code>/staff</code> (read-only) atau <code>/admins</code>.
+        </p>
       </div>
     </section>
   </main>
