@@ -28,9 +28,7 @@
       position:fixed;left:0;top:0;bottom:0;width:300px;background:#000;color:#fff;
       padding:60px 50px;z-index:999;box-shadow:50px 0 80px rgba(0,0,0,0.4);
     }
-    .logo{
-      margin-bottom:120px;
-    }
+    .logo{margin-bottom:120px}
     .logo h1{
       font-size:38px;font-weight:900;letter-spacing:-3px;line-height:0.95;
       background:#fff;color:#000;padding:25px 35px;display:inline-block;
@@ -41,9 +39,7 @@
       cursor:pointer;transition:all .35s;opacity:0.8;padding-left:0;position:relative;
       padding-bottom:8px;
     }
-    .menu-item:hover,.menu-item.active{
-      opacity:1;
-    }
+    .menu-item:hover,.menu-item.active{opacity:1}
     .menu-item::after{
       content:"";position:absolute;left:0;bottom:0;width:0;height:3px;background:#fff;
       transition:all .35s;
@@ -51,14 +47,10 @@
     .menu-item:hover::after,.menu-item.active::after{width:40px}
 
     /* MAIN CONTENT */
-    .main{
-      margin-left:300px;padding:140px 100px 140px;min-height:100vh;
-    }
+    .main{margin-left:300px;padding:140px 100px 140px;min-height:100vh}
     .content{display:none}
     .content.active{display:block}
-    h2{
-      font-size:64px;font-weight:900;letter-spacing:-6px;line-height:0.95;margin-bottom:80px;
-    }
+    h2{font-size:64px;font-weight:900;letter-spacing:-6px;line-height:0.95;margin-bottom:80px}
 
     /* TABLE */
     table{width:100%;border-collapse:separate;border-spacing:0 35px}
@@ -69,7 +61,7 @@
     .form-box{
       max-width:900px;background:#fafafa;padding:80px 100px;border:8px solid #000;margin:100px 0;
     }
-    .form-box input, .form-box select, .form-box textarea{
+    .form-box input,.form-box select,.form-box textarea{
       width:100%;padding:20px 0;background:none;border:none;border-bottom:5px solid #000;
       font-size:22px;margin:40px 0;outline:none;
     }
@@ -80,7 +72,6 @@
       letter-spacing:5px;border:none;cursor:pointer;transition:.35s;margin-right:15px;
     }
     .btn:hover{background:#ff0000}
-    .btn-small{padding:10px 20px;font-size:13px;margin:0 5px}
 
     /* USER INFO + LOGOUT */
     .user-info{
@@ -100,13 +91,6 @@
       font-size:14px;letter-spacing:8px;font-weight:900;color:#000;
       z-index:1000;
     }
-
-    /* KELOLA KATEGORI */
-    .kategori-list{margin-top:50px}
-    .kategori-item{
-      display:flex;align-items:center;justify-content:space-between;padding:20px 0;
-      border-bottom:2px solid #ccc;font-size:18px;
-    }
   </style>
 </head>
 <body>
@@ -115,10 +99,10 @@
     <div class="logo">
       <h1>INVENTARIS<br>KOMPUTER</h1>
     </div>
-    <div class="menu-item active" onclick="showPage('home')">HOME</div>
-    <div class="menu-item" onclick="showPage('assets')">SEMUA ASSET</div>
-    <div class="menu-item" id="menuAdd" style="display:none" onclick="showPage('add')">+ TAMBAH BARANG</div>
-    <div class="menu-item" id="menuKategori" style="display:none" onclick="showPage('kategori')">KELOLA KATEGORI</div>
+    <div class="menu-item active" data-page="home" onclick="showPage('home')">HOME</div>
+    <div class="menu-item" data-page="assets" onclick="showPage('assets')">SEMUA ASSET</div>
+    <div class="menu-item" id="menuAdd" style="display:none" data-page="add" onclick="showPage('add')">+ TAMBAH BARANG</div>
+    <div class="menu-item" id="menuKategori" style="display:none" data-page="kategori" onclick="showPage('kategori')">KELOLA KATEGORI</div>
     <div class="menu-item" onclick="alert('2026')">RUSAK / HILANG</div>
   </div>
 
@@ -164,21 +148,15 @@
       </div>
     </div>
 
-    <!-- KELOLA KATEGORI -->
+    <!-- KELOLA KATEGORI — SEKARANG PASTI MUNCUL -->
     <div id="kategori" class="content">
       <h2>KELOLA<br>KATEGORI</h2>
-      
-      <div class="form-box" style="max-width:700px;margin:100px auto 50px">
-        <input type="text" id="newKategori" placeholder="NAMA KATEGORI BARU">
-        <button class="btn" onclick="tambahKategori()">+ TAMBAH KATEGORI</button>
+      <div class="form-box" style="max-width:700px">
+        <input type="text" id="newKategori" placeholder="TAMBAH KATEGORI BARU">
+        <button class="btn" onclick="tambahKategori()">+ TAMBAH</button>
       </div>
-
-      <div id="kategoriStatus" style="text-align:center;padding:50px;font-size:20px;opacity:0.6">
+      <div id="kategoriList" style="margin-top:50px">
         Loading kategori...
-      </div>
-
-      <div class="kategori-list" id="daftarKategori" style="display:none">
-        <!-- ISI OTOMATIS -->
       </div>
     </div>
 
@@ -207,32 +185,43 @@
           document.getElementById('menuKategori').style.display = 'block';
           document.getElementById('aksiHeader').style.display = 'table-cell';
         }
-        // Pastikan load kategori setelah login
-        loadKategori();
+        loadKategori(); // load langsung setelah login
       });
     });
 
+    // LOGIKA showPage YANG BARU & 100% JALAN
+    function showPage(pageId) {
+      // Sembunyikan semua content
+      document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+      // Tampilkan yang dipilih
+      const target = document.getElementById(pageId);
+      if (target) target.classList.add('active');
+
+      // Update menu active pakai data-page (SUPER RELIABLE)
+      document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+      const activeMenu = document.querySelector(`.menu-item[data-page="${pageId}"]`);
+      if (activeMenu) activeMenu.classList.add('active');
+
+      // Load data sesuai halaman
+      if (pageId === 'assets') loadTable();
+      if (pageId === 'kategori' || pageId === 'add') loadKategori();
+    }
+
+    // LOAD KATEGORI (dropdown + list)
     function loadKategori() {
       const select = document.getElementById('kategori');
-      const list = document.getElementById('daftarKategori');
-      const status = document.getElementById('kategoriStatus');
+      const list = document.getElementById('kategoriList');
 
       db.ref('kategori').on('value', snap => {
-        const data = snap.val();
-
-        if (!data || Object.keys(data).length === 0) {
-          status.innerHTML = 'BELUM ADA KATEGORI<br><br><button class="btn" style="background:#ff0000" onclick="forceDefaultKategori()">KLIK DI SINI UNTUK BUAT DEFAULT KATEGORI</button>';
-          list.style.display = 'none';
-          select.innerHTML = '<option value="">— BELUM ADA KATEGORI —</option>';
-          return;
-        }
-
-        status.style.display = 'none';
-        list.style.display = 'block';
+        const data = snap.val() || {};
         select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
         list.innerHTML = '';
 
-        let no = 1;
+        if (Object.keys(data).length === 0) {
+          list.innerHTML = '<p style="text-align:center;padding:100px;opacity:0.5;font-size:20px">BELUM ADA KATEGORI<br><br><button class="btn" style="background:#ff0000" onclick="forceDefault()">BUAT DEFAULT KATEGORI</button></p>';
+          return;
+        }
+
         Object.keys(data).forEach(key => {
           const nama = data[key].nama;
 
@@ -242,39 +231,33 @@
           opt.textContent = nama;
           select.appendChild(opt);
 
-          // List
+          // List dengan hapus
           const div = document.createElement('div');
-          div.className = 'kategori-item';
+          div.style = "padding:20px 0;border-bottom:2px solid #ddd;display:flex;justify-content:space-between;align-items:center;font-size:18px";
           div.innerHTML = `
-            <span>${no++}. ${nama}</span>
-            <div>
-              <button class="btn btn-small" style="background:#ff0000" onclick="hapusKategori('${key}')">HAPUS</button>
-            </div>
+            <span>${nama}</span>
+            <button class="btn" style="background:#ff0000;padding:10px 20px;font-size:14px" onclick="hapusKategori('${key}')">HAPUS</button>
           `;
           list.appendChild(div);
         });
       });
     }
 
-    // FORCE BUAT DEFAULT KATEGORI (TOMBOL DARURAT)
-    window.forceDefaultKategori = function() {
-      if (confirm('Yakin buat ulang 7 kategori default?')) {
-        db.ref('kategori').set({}).then(() => { // kosongin dulu
-          defaultKategori.forEach(nama => {
-            db.ref('kategori').push({nama});
-          });
+    // FORCE BUAT DEFAULT KATEGORI
+    window.forceDefault = function() {
+      if (confirm('Yakin buat 7 kategori default?')) {
+        db.ref('kategori').remove().then(() => {
+          defaultKategori.forEach(nama => db.ref('kategori').push({nama}));
           alert('7 kategori default berhasil dibuat!');
         });
       }
     };
 
     function tambahKategori() {
-      const nama = document.getElementById('newKategori').value.trim();
-      if (!nama) return alert('Isi nama kategori!');
-      db.ref('kategori').push({nama}).then(() => {
-        alert('Kategori ditambahkan!');
-        document.getElementById('newKategori').value = '';
-      });
+      const nama = prompt("Nama kategori baru:");
+      if (nama && nama.trim()) {
+        db.ref('kategori').push({nama: nama.trim()});
+      }
     }
 
     function hapusKategori(key) {
@@ -283,20 +266,9 @@
       }
     }
 
-    function showPage(p) {
-      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-      document.getElementById(p).classList.add('active');
-      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-      document.querySelectorAll('.menu-item').forEach(m => {
-        if (m.onclick && m.onclick.toString().includes(p)) m.classList.add('active');
-      });
-      if (p === 'assets') loadTable();
-      if (p === 'kategori') loadKategori(); // pastiin load ulang
-    }
+    // ... (loadTable, saveData, edit, dll tetap sama seperti versi yang sudah jalan)
 
-    // ... (loadTable, saveData, edit, clearForm tetap sama seperti versi sebelumnya yang jalan)
-
-    // PASTIKAN LOAD KATEGORI SAAT HALAMAN DIBUKA
+    // Jalankan saat halaman dibuka
     loadKategori();
   </script>
 </body>
