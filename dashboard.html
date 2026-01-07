@@ -101,14 +101,15 @@
       z-index:1000;
     }
 
-    /* KELOLA KATEGORI */
-    .kategori-list{margin-top:50px}
-    .kategori-item{
-      display:flex;align-items:center;justify-content:space-between;padding:20px 0;
-      border-bottom:2px solid #ccc;font-size:18px;
+    /* TABEL KELOLA KATEGORI */
+    #kategoriTable th{
+      font-size:14px;letter-spacing:8px;text-transform:uppercase;opacity:0.8;
     }
-    .kategori-item input{
-      width:60%;padding:10px;font-size:18px;border:2px solid #000;background:none;
+    #kategoriTable td{
+      font-size:20px;padding:20px 0;
+    }
+    .edit-input{
+      width:70%;padding:10px;font-size:18px;border:2px solid #000;background:none;
     }
   </style>
 </head>
@@ -167,16 +168,29 @@
       </div>
     </div>
 
-    <!-- KELOLA KATEGORI — SEKARANG BISA TAMBAH, EDIT, HAPUS LANGSUNG -->
+    <!-- KELOLA KATEGORI — TABEL + FORM INPUT -->
     <div id="kategori" class="content">
       <h2>KELOLA<br>KATEGORI</h2>
-      <div class="form-box">
+      
+      <!-- FORM TAMBAH KATEGORI -->
+      <div class="form-box" style="max-width:700px;margin:100px auto 50px">
         <input type="text" id="newKategori" placeholder="NAMA KATEGORI BARU">
         <button class="btn" onclick="tambahKategori()">+ TAMBAH KATEGORI</button>
       </div>
-      <div class="kategori-list" id="daftarKategori">
-        <!-- DIISI OTOMATIS DARI FIREBASE -->
-      </div>
+
+      <!-- TABEL KELOLA KATEGORI -->
+      <table id="kategoriTable">
+        <thead>
+          <tr>
+            <th>NO</th>
+            <th>NAMA KATEGORI</th>
+            <th>AKSI</th>
+          </tr>
+        </thead>
+        <tbody id="kategoriTableBody">
+          <!-- ISI OTOMATIS -->
+        </tbody>
+      </table>
     </div>
 
   </div>
@@ -189,7 +203,6 @@
     firebase.initializeApp({apiKey:"AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",authDomain:"inventariskomputer.firebaseapp.com",databaseURL:"https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inventariskomputer",storageBucket:"inventariskomputer.firebasestorage.app",messagingSenderId:"915927761008",appId:"1:915927761008:web:a4b2e71159d00501fdf4b5"});
     const auth=firebase.auth();const db=firebase.database();let role='staff',ek=null;
 
-    // Default kategori kalau kosong
     const defaultKategori = ["Laptop","PC Desktop","Monitor","Printer","Aksesoris","Jaringan","Lainnya"];
 
     auth.onAuthStateChanged(u=>{
@@ -205,49 +218,51 @@
       });
     });
 
-    // LOAD KATEGORI + BUAT DEFAULT KALAU BELUM ADA
+    // LOAD KATEGORI DENGAN TABEL + DEFAULT
     function loadKategori(){
       const select = document.getElementById('kategori');
-      const list = document.getElementById('daftarKategori');
+      const tbody = document.getElementById('kategoriTableBody');
 
       db.ref('kategori').once('value').then(snap=>{
-        if(!snap.exists()){
-          // Buat default kategori kalau database kosong
+        if(!snap.exists() || Object.keys(snap.val() || {}).length === 0){
+          // Buat default kategori kalau kosong
           defaultKategori.forEach(nama=>{
-            db.ref('kategori').push({nama: nama});
+            db.ref('kategori').push({nama});
           });
         }
 
-        // Update dropdown dan list secara real-time
+        // Update real-time
         db.ref('kategori').on('value', snap=>{
           const data = snap.val() || {};
           select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
-          list.innerHTML = '';
+          tbody.innerHTML = '';
 
+          let no = 1;
           Object.keys(data).forEach(key=>{
             const nama = data[key].nama;
 
             // Dropdown
             const opt = document.createElement('option');
-            opt.value = nama;
-            opt.textContent = nama;
+            opt.value = nama; opt.textContent = nama;
             select.appendChild(opt);
 
-            // List kelola kategori dengan tombol edit & hapus
-            const div = document.createElement('div');
-            div.className = 'kategori-item';
-            div.innerHTML = `
-              <div>
-                <input type="text" value="${nama}" id="edit-${key}" style="width:70%">
+            // Tabel kelola kategori
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${no++}</td>
+              <td>
+                <input type="text" value="${nama}" id="edit-${key}" class="edit-input">
+              </td>
+              <td>
                 <button class="btn btn-small" onclick="updateKategori('${key}', document.getElementById('edit-${key}').value)">UPDATE</button>
-              </div>
-              <button class="btn btn-small" style="background:#ff0000" onclick="hapusKategori('${key}')">HAPUS</button>
+                <button class="btn btn-small" style="background:#ff0000" onclick="hapusKategori('${key}')">HAPUS</button>
+              </td>
             `;
-            list.appendChild(div);
+            tbody.appendChild(tr);
           });
 
           if(Object.keys(data).length === 0){
-            list.innerHTML = '<p style="opacity:0.5;text-align:center;padding:50px">Belum ada kategori. Tambah satu!</p>';
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:100px;opacity:0.5">BELUM ADA KATEGORI</td></tr>';
           }
         });
       });
@@ -256,12 +271,10 @@
     function tambahKategori(){
       const nama = document.getElementById('newKategori').value.trim();
       if(!nama) return alert('Isi nama kategori!');
-      if(nama.length < 2) return alert('Nama terlalu pendek!');
-      
-      db.ref('kategori').push({nama: nama}).then(()=>{
-        alert('Kategori "' + nama + '" berhasil ditambahkan!');
+      db.ref('kategori').push({nama}).then(()=>{
+        alert('Kategori "' + nama + '" ditambahkan!');
         document.getElementById('newKategori').value = '';
-      }).catch(err=>alert('Error: ' + err.message));
+      });
     }
 
     function updateKategori(key, newNama){
@@ -272,14 +285,14 @@
     }
 
     function hapusKategori(key){
-      if(confirm('Yakin hapus kategori ini? Semua barang akan jadi kategori "LAINNYA"')){
+      if(confirm('Yakin hapus kategori ini?')){
         db.ref('kategori/' + key).remove().then(()=>{
           alert('Kategori dihapus!');
         });
       }
     }
 
-    // ... (fungsi showPage, loadTable, saveData, edit, dll tetap sama seperti sebelumnya)
+    // ... (fungsi showPage, loadTable, saveData, edit, dll tetap sama seperti sebelumnya — gue taruh lengkap di bawah)
 
     function showPage(p){
       document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
