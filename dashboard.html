@@ -201,118 +201,124 @@
 
   <script>
     firebase.initializeApp({apiKey:"AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",authDomain:"inventariskomputer.firebaseapp.com",databaseURL:"https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inventariskomputer",storageBucket:"inventariskomputer.firebasestorage.app",messagingSenderId:"915927761008",appId:"1:915927761008:web:a4b2e71159d00501fdf4b5"});
-    const auth=firebase.auth();const db=firebase.database();let role='staff',ek=null;
+    const auth = firebase.auth();
+    const db = firebase.database();
+    let role = 'staff';
+    let ek = null;
 
+    // Default kategori
     const defaultKategori = ["Laptop","PC Desktop","Monitor","Printer","Aksesoris","Jaringan","Lainnya"];
 
-    auth.onAuthStateChanged(u=>{
-      if(!u) location.href="login.html";
-      db.ref('users/'+u.uid).once('value').then(s=>{
-        const d=s.val();role=d.role||'staff';
+    // Pastikan default kategori ada dari pertama kali buka
+    db.ref('kategori').once('value').then(snap => {
+      if (!snap.exists() || Object.keys(snap.val() || {}).length === 0) {
+        defaultKategori.forEach(nama => {
+          db.ref('kategori').push({nama: nama});
+        });
+      }
+    });
+
+    auth.onAuthStateChanged(u => {
+      if (!u) location.href = "login.html";
+      db.ref('users/' + u.uid).once('value').then(s => {
+        const d = s.val();
+        role = d.role || 'staff';
         document.getElementById('userInfo').innerText = d.nama + " – " + role.toUpperCase();
-        if(role==='admin'){
-          document.getElementById('menuAdd').style.display='block';
-          document.getElementById('menuKategori').style.display='block';
-          document.getElementById('aksiHeader').style.display='table-cell';
+        if (role === 'admin') {
+          document.getElementById('menuAdd').style.display = 'block';
+          document.getElementById('menuKategori').style.display = 'block';
+          document.getElementById('aksiHeader').style.display = 'table-cell';
         }
       });
     });
 
-    // LOAD KATEGORI DENGAN TABEL + DEFAULT
-    function loadKategori(){
+    // Load kategori untuk dropdown dan tabel
+    function loadKategori() {
       const select = document.getElementById('kategori');
       const tbody = document.getElementById('kategoriTableBody');
 
-      db.ref('kategori').once('value').then(snap=>{
-        if(!snap.exists() || Object.keys(snap.val() || {}).length === 0){
-          // Buat default kategori kalau kosong
-          defaultKategori.forEach(nama=>{
-            db.ref('kategori').push({nama});
-          });
-        }
+      db.ref('kategori').on('value', snap => {
+        const data = snap.val() || {};
+        select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
+        tbody.innerHTML = '';
 
-        // Update real-time
-        db.ref('kategori').on('value', snap=>{
-          const data = snap.val() || {};
-          select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
-          tbody.innerHTML = '';
+        let no = 1;
+        Object.keys(data).forEach(key => {
+          const nama = data[key].nama;
 
-          let no = 1;
-          Object.keys(data).forEach(key=>{
-            const nama = data[key].nama;
+          // Dropdown tambah barang
+          const opt = document.createElement('option');
+          opt.value = nama;
+          opt.textContent = nama;
+          select.appendChild(opt);
 
-            // Dropdown
-            const opt = document.createElement('option');
-            opt.value = nama; opt.textContent = nama;
-            select.appendChild(opt);
-
-            // Tabel kelola kategori
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${no++}</td>
-              <td>
-                <input type="text" value="${nama}" id="edit-${key}" class="edit-input">
-              </td>
-              <td>
-                <button class="btn btn-small" onclick="updateKategori('${key}', document.getElementById('edit-${key}').value)">UPDATE</button>
-                <button class="btn btn-small" style="background:#ff0000" onclick="hapusKategori('${key}')">HAPUS</button>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
-
-          if(Object.keys(data).length === 0){
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:100px;opacity:0.5">BELUM ADA KATEGORI</td></tr>';
-          }
+          // Tabel kelola kategori
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${no++}</td>
+            <td>
+              <input type="text" value="${nama}" id="edit-${key}" class="edit-input">
+            </td>
+            <td>
+              <button class="btn btn-small" onclick="updateKategori('${key}', document.getElementById('edit-${key}').value)">UPDATE</button>
+              <button class="btn btn-small" style="background:#ff0000" onclick="hapusKategori('${key}')">HAPUS</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
         });
+
+        if (Object.keys(data).length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:100px;opacity:0.5">BELUM ADA KATEGORI</td></tr>';
+        }
       });
     }
 
-    function tambahKategori(){
+    function tambahKategori() {
       const nama = document.getElementById('newKategori').value.trim();
-      if(!nama) return alert('Isi nama kategori!');
-      db.ref('kategori').push({nama}).then(()=>{
-        alert('Kategori "' + nama + '" ditambahkan!');
+      if (!nama) return alert('Isi nama kategori!');
+      db.ref('kategori').push({nama: nama}).then(() => {
+        alert('Kategori ditambahkan!');
         document.getElementById('newKategori').value = '';
       });
     }
 
-    function updateKategori(key, newNama){
-      if(!newNama.trim()) return alert('Nama tidak boleh kosong!');
-      db.ref('kategori/' + key).update({nama: newNama.trim()}).then(()=>{
+    function updateKategori(key, newNama) {
+      if (!newNama.trim()) return alert('Nama tidak boleh kosong!');
+      db.ref('kategori/' + key).update({nama: newNama.trim()}).then(() => {
         alert('Kategori diperbarui!');
       });
     }
 
-    function hapusKategori(key){
-      if(confirm('Yakin hapus kategori ini?')){
-        db.ref('kategori/' + key).remove().then(()=>{
+    function hapusKategori(key) {
+      if (confirm('Yakin hapus kategori ini?')) {
+        db.ref('kategori/' + key).remove().then(() => {
           alert('Kategori dihapus!');
         });
       }
     }
 
-    // ... (fungsi showPage, loadTable, saveData, edit, dll tetap sama seperti sebelumnya — gue taruh lengkap di bawah)
-
-    function showPage(p){
-      document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+    function showPage(p) {
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
       document.getElementById(p).classList.add('active');
-      document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
-      document.querySelectorAll('.menu-item').forEach(m=>{
-        if(m.onclick && m.onclick.toString().includes(p)) m.classList.add('active');
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(m => {
+        if (m.onclick && m.onclick.toString().includes(p)) m.classList.add('active');
       });
-      if(p==='assets') loadTable();
-      if(p==='add' || p==='kategori') loadKategori();
+      if (p === 'assets') loadTable();
+      if (p === 'add' || p === 'kategori') loadKategori();
     }
 
-    function loadTable(){
-      db.ref('inventaris').on('value',s=>{
-        const t=document.getElementById('tableBody');t.innerHTML='';
-        if(!s.exists()){t.innerHTML='<tr><td colspan="7" style="text-align:center;padding:180px;font-size:28px;opacity:0.2">NO DATA</td></tr>';return;}
-        s.forEach(c=>{
-          const i=c.val();const k=c.key;
-          const r=document.createElement('tr');
-          r.innerHTML=`<td>${i.kategori||'LAINNYA'}</td><td>${i.merk||''}</td><td>${i.tipe||''}</td><td>${i.sn||'-'}</td><td>${i.lokasi||''}</td><td>${i.status||''}</td>
+    function loadTable() {
+      db.ref('inventaris').on('value', s => {
+        const t = document.getElementById('tableBody'); t.innerHTML = '';
+        if (!s.exists()) {
+          t.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:180px;font-size:28px;opacity:0.2">NO DATA</td></tr>';
+          return;
+        }
+        s.forEach(c => {
+          const i = c.val(); const k = c.key;
+          const r = document.createElement('tr');
+          r.innerHTML = `<td>${i.kategori||'LAINNYA'}</td><td>${i.merk||''}</td><td>${i.tipe||''}</td><td>${i.sn||'-'}</td><td>${i.lokasi||''}</td><td>${i.status||''}</td>
             <td style="display:${role==='admin'?'':'none'}">
               <button class="btn" style="padding:14px 35px;font-size:14px" onclick="edit('${k}',${JSON.stringify(i)})">EDIT</button>
               <button class="btn" style="background:#ff0000;padding:14px 35px;font-size:14px;margin-left:12px" onclick="if(confirm('DELETE?'))db.ref('inventaris/${k}').remove()">DELETE</button>
@@ -322,45 +328,45 @@
       });
     }
 
-    function clearForm(){
-      ek=null;
-      document.getElementById('formTitle').innerText='TAMBAH\nBARANG';
+    function clearForm() {
+      ek = null;
+      document.getElementById('formTitle').innerText = 'TAMBAH\nBARANG';
       document.getElementById('kategori').selectedIndex = 0;
-      document.getElementById('merk').value='';document.getElementById('tipe').value='';
-      document.getElementById('sn').value='';document.getElementById('lokasi').value='';
-      document.getElementById('status').value='OPERATIONAL';document.getElementById('keterangan').value='';
+      document.getElementById('merk').value = ''; document.getElementById('tipe').value = '';
+      document.getElementById('sn').value = ''; document.getElementById('lokasi').value = '';
+      document.getElementById('status').value = 'OPERATIONAL'; document.getElementById('keterangan').value = '';
     }
 
-    function edit(k,i){
-      ek=k;showPage('add');
-      document.getElementById('formTitle').innerText='EDIT\nDATA';
-      document.getElementById('kategori').value=i.kategori||'';
-      document.getElementById('merk').value=i.merk||'';
-      document.getElementById('tipe').value=i.tipe||'';
-      document.getElementById('sn').value=i.sn||'';
-      document.getElementById('lokasi').value=i.lokasi||'';
-      document.getElementById('status').value=i.status||'OPERATIONAL';
-      document.getElementById('keterangan').value=i.keterangan||'';
+    function edit(k, i) {
+      ek = k; showPage('add');
+      document.getElementById('formTitle').innerText = 'EDIT\nDATA';
+      document.getElementById('kategori').value = i.kategori || '';
+      document.getElementById('merk').value = i.merk || '';
+      document.getElementById('tipe').value = i.tipe || '';
+      document.getElementById('sn').value = i.sn || '';
+      document.getElementById('lokasi').value = i.lokasi || '';
+      document.getElementById('status').value = i.status || 'OPERATIONAL';
+      document.getElementById('keterangan').value = i.keterangan || '';
     }
 
-    function saveData(){
-      if(role!=='admin') return alert('ADMIN ONLY');
-      const d={
-        kategori:document.getElementById('kategori').value||'LAINNYA',
-        merk:document.getElementById('merk').value.trim(),
-        tipe:document.getElementById('tipe').value.trim(),
-        sn:document.getElementById('sn').value.trim()||'-',
-        lokasi:document.getElementById('lokasi').value.trim(),
-        status:document.getElementById('status').value,
-        keterangan:document.getElementById('keterangan').value.trim()||'-',
-        tanggal_input:new Date().toISOString().split('T')[0]
+    function saveData() {
+      if (role !== 'admin') return alert('ADMIN ONLY');
+      const d = {
+        kategori: document.getElementById('kategori').value || 'LAINNYA',
+        merk: document.getElementById('merk').value.trim(),
+        tipe: document.getElementById('tipe').value.trim(),
+        sn: document.getElementById('sn').value.trim() || '-',
+        lokasi: document.getElementById('lokasi').value.trim(),
+        status: document.getElementById('status').value,
+        keterangan: document.getElementById('keterangan').value.trim() || '-',
+        tanggal_input: new Date().toISOString().split('T')[0]
       };
-      if(!d.kategori||!d.merk||!d.tipe||!d.lokasi) return alert('LENGKAPI DATA!');
-      const k=ek||Date.now();
-      db.ref('inventaris/'+k).set(d).then(()=>{alert('SAVED');showPage('assets');});
+      if (!d.kategori || !d.merk || !d.tipe || !d.lokasi) return alert('LENGKAPI DATA!');
+      const k = ek || Date.now();
+      db.ref('inventaris/' + k).set(d).then(() => { alert('SAVED'); showPage('assets'); });
     }
 
-    // Jalankan saat halaman dibuka
+    // Jalankan loadKategori saat halaman dibuka (untuk dropdown add barang)
     loadKategori();
   </script>
 </body>
