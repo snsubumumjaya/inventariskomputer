@@ -11,6 +11,7 @@
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
     html,body{height:100%;margin:0;background:#fff;color:#000;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;overflow-x:hidden}
     
+    /* GRID INDUSTRIAL MINIMAL */
     body::before{
       content:"";position:fixed;inset:0;z-index:-1;
       background:linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px);
@@ -22,6 +23,7 @@
       background-size:180px 180px;opacity:0.07;pointer-events:none;
     }
 
+    /* SIDEBAR FULL SAMPE BAWAH */
     .sidebar{
       position:fixed;left:0;top:0;bottom:0;width:300px;background:#000;color:#fff;
       padding:60px 50px;z-index:999;box-shadow:50px 0 80px rgba(0,0,0,0.4);
@@ -44,15 +46,34 @@
     }
     .menu-item:hover::after,.menu-item.active::after{width:40px}
 
+    /* MAIN CONTENT */
     .main{margin-left:300px;padding:140px 100px 140px;min-height:100vh}
     .content{display:none}
     .content.active{display:block}
     h2{font-size:64px;font-weight:900;letter-spacing:-6px;line-height:0.95;margin-bottom:80px}
 
+    /* TABLE */
     table{width:100%;border-collapse:separate;border-spacing:0 35px}
     th{font-size:12px;letter-spacing:6px;text-transform:uppercase;opacity:0.7;padding-bottom:25px}
     td{font-size:19px;font-weight:400;padding:25px 0;border-bottom:5px solid #000}
 
+    /* FORM */
+    .form-box{
+      max-width:900px;background:#fafafa;padding:80px 100px;border:8px solid #000;margin:100px 0;
+    }
+    .form-box input, .form-box select, .form-box textarea{
+      width:100%;padding:20px 0;background:none;border:none;border-bottom:5px solid #000;
+      font-size:22px;margin:40px 0;outline:none;
+    }
+
+    /* BUTTON */
+    .btn{
+      padding:16px 55px;background:#000;color:#fff;font-size:15px;font-weight:900;
+      letter-spacing:5px;border:none;cursor:pointer;transition:.35s;margin-right:15px;
+    }
+    .btn:hover{background:#ff0000}
+
+    /* USER INFO + LOGOUT */
     .user-info{
       position:fixed;right:70px;top:60px;z-index:999;background:#fff;
       padding:16px 35px;border:6px solid #000;font-size:13px;letter-spacing:6px;font-weight:900;
@@ -64,6 +85,7 @@
     }
     .logout-btn:hover{background:#000;color:#fff}
 
+    /* FOOTER TULISAN HITAM DOANG */
     .footer{
       position:fixed;bottom:30px;left:300px;right:0;text-align:center;
       font-size:14px;letter-spacing:8px;font-weight:900;color:#000;
@@ -105,30 +127,45 @@
 
     <div id="add" class="content">
       <h2>TAMBAH<br>BARANG</h2>
-      <div style="max-width:900px;background:#fafafa;padding:80px 100px;border:8px solid #000;margin:100px 0">
-        <p style="font-size:24px;text-align:center;padding:100px 0;opacity:0.6">Form tambah barang sementara dinonaktifkan untuk perbaikan.</p>
+      <div class="form-box">
+        <select id="kategori">
+          <option value="">— PILIH KATEGORI —</option>
+        </select>
+        <input type="text" id="merk" placeholder="MERK">
+        <input type="text" id="tipe" placeholder="TIPE / SPESIFIKASI">
+        <input type="text" id="sn" placeholder="SERIAL NUMBER (opsional)">
+        <input type="text" id="lokasi" placeholder="LOKASI / RUANGAN">
+        <select id="status">
+          <option value="OPERATIONAL">OPERATIONAL</option>
+          <option value="RUSAK">RUSAK</option>
+          <option value="PERBAIKAN">DALAM PERBAIKAN</option>
+          <option value="HILANG">HILANG</option>
+        </select>
+        <textarea id="keterangan" placeholder="KETERANGAN TAMBAHAN (opsional)"></textarea>
+        <br><br>
+        <button class="btn" onclick="saveData()">SIMPAN</button>
       </div>
     </div>
 
-    <!-- KELOLA KATEGORI — LANGSUNG TABEL DARI FIREBASE -->
+    <!-- KELOLA KATEGORI — TABEL DENGAN ISI OTOMATIS -->
     <div id="kategori" class="content">
       <h2>KELOLA<br>KATEGORI</h2>
-      <div style="max-width:900px;margin:100px auto;background:#fafafa;padding:80px;border:8px solid #000">
-        <h3 style="font-size:32px;margin-bottom:50px">DAFTAR KATEGORI SAAT INI</h3>
-        <table style="width:100%;margin-top:30px">
+      <div class="form-box">
+        <h3 style="font-size:28px;margin-bottom:40px">DAFTAR KATEGORI SAAT INI</h3>
+        <table style="width:100%">
           <thead>
             <tr>
-              <th style="text-align:left;padding-bottom:20px">NO</th>
-              <th style="text-align:left;padding-bottom:20px">NAMA KATEGORI</th>
+              <th style="text-align:left;font-size:14px;letter-spacing:6px;opacity:0.7">NO</th>
+              <th style="text-align:left;font-size:14px;letter-spacing:6px;opacity:0.7">NAMA KATEGORI</th>
             </tr>
           </thead>
-          <tbody id="kategoriList">
+          <tbody id="kategoriTableBody">
             <!-- ISI OTOMATIS DARI FIREBASE -->
           </tbody>
         </table>
-        <p style="margin-top:50px;opacity:0.6;font-size:18px">
+        <p style="margin-top:60px;opacity:0.6;font-size:16px">
           Fitur tambah/edit/hapus kategori sementara dinonaktifkan.<br>
-          Gunakan Firebase Console → Realtime Database → kategori untuk mengatur.
+          Gunakan Firebase Console untuk mengatur kategori.
         </p>
       </div>
     </div>
@@ -145,23 +182,17 @@
     const db = firebase.database();
     let role = 'staff';
 
-    // ONCLICK LANGSUNG — PALING PASTI JALAN
-    function showPage(id) {
-      const contents = document.getElementsByClassName('content');
-      for(let i=0; i<contents.length; i++){
-        contents[i].classList.remove('active');
-      }
-      document.getElementById(id).classList.add('active');
+    // Default kategori
+    const defaultKategori = ["Laptop","PC Desktop","Monitor","Printer","Aksesoris","Jaringan","Lainnya"];
 
-      const menus = document.getElementsByClassName('menu-item');
-      for(let i=0; i<menus.length; i++){
-        menus[i].classList.remove('active');
+    // Buat default kategori kalau kosong
+    db.ref('kategori').once('value').then(snap => {
+      if (!snap.exists() || Object.keys(snap.val() || {}).length === 0) {
+        defaultKategori.forEach(nama => {
+          db.ref('kategori').push({nama});
+        });
       }
-      event.target.classList.add('active');
-
-      if(id === 'kategori') loadKategoriList();
-      if(id === 'assets') loadTable();
-    }
+    });
 
     auth.onAuthStateChanged(u => {
       if (!u) location.href = "login.html";
@@ -177,10 +208,24 @@
       });
     });
 
-    // LOAD KATEGORI UNTUK TABEL
-    function loadKategoriList() {
-      const tbody = document.getElementById('kategoriList');
-      tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:100px;opacity:0.5">Loading...</td></tr>';
+    // SPA PALING AMAN DI DUNIA
+    function showPage(id) {
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      const activeMenu = Array.from(document.querySelectorAll('.menu-item')).find(m => m.onclick && m.onclick.toString().includes(id));
+      if (activeMenu) activeMenu.classList.add('active');
+
+      if (id === 'kategori') loadKategoriTable();
+      if (id === 'assets') loadTable();
+      if (id === 'add') loadKategoriDropdown();
+    }
+
+    // Load kategori untuk tabel kelola kategori
+    function loadKategoriTable() {
+      const tbody = document.getElementById('kategoriTableBody');
+      tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:100px;opacity:0.5">Loading kategori...</td></tr>';
 
       db.ref('kategori').on('value', snap => {
         const data = snap.val();
@@ -195,11 +240,24 @@
         Object.keys(data).forEach(key => {
           const nama = data[key].nama || 'Unknown';
           const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${no++}</td>
-            <td>${nama}</td>
-          `;
+          tr.innerHTML = `<td>${no++}</td><td>${nama}</td>`;
           tbody.appendChild(tr);
+        });
+      });
+    }
+
+    // Load kategori untuk dropdown tambah barang
+    function loadKategoriDropdown() {
+      const select = document.getElementById('kategori');
+      select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
+
+      db.ref('kategori').on('value', snap => {
+        const data = snap.val() || {};
+        Object.keys(data).forEach(key => {
+          const opt = document.createElement('option');
+          opt.value = data[key].nama;
+          opt.textContent = data[key].nama;
+          select.appendChild(opt);
         });
       });
     }
@@ -207,7 +265,7 @@
     // Load table asset
     function loadTable() {
       const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:100px;opacity:0.5">Loading...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:180px;opacity:0.2">Loading...</td></tr>';
 
       db.ref('inventaris').on('value', snap => {
         tbody.innerHTML = '';
@@ -218,25 +276,37 @@
         snap.forEach(c => {
           const i = c.val();
           const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${i.kategori || 'LAINNYA'}</td>
-            <td>${i.merk || ''}</td>
-            <td>${i.tipe || ''}</td>
-            <td>${i.sn || '-'}</td>
-            <td>${i.lokasi || ''}</td>
-            <td>${i.status || ''}</td>
+          tr.innerHTML = `<td>${i.kategori||'LAINNYA'}</td><td>${i.merk||''}</td><td>${i.tipe||''}</td><td>${i.sn||'-'}</td><td>${i.lokasi||''}</td><td>${i.status||''}</td>
             <td style="display:${role==='admin'?'':'none'}">
-              <button style="padding:10px 20px;background:#000;color:#fff;border:none;cursor:pointer" onclick="alert('Edit belum aktif')">EDIT</button>
-              <button style="padding:10px 20px;background:#ff0000;color:#fff;border:none;cursor:pointer;margin-left:10px" onclick="if(confirm('DELETE?'))db.ref('inventaris/${c.key}').remove()">DELETE</button>
-            </td>
-          `;
+              <button class="btn" style="padding:12px 30px;font-size:13px" onclick="alert('Edit belum aktif')">EDIT</button>
+              <button class="btn" style="background:#ff0000;padding:12px 30px;font-size:13px;margin-left:10px" onclick="if(confirm('DELETE?'))db.ref('inventaris/${c.key}').remove()">DELETE</button>
+            </td>`;
           tbody.appendChild(tr);
         });
       });
     }
 
+    function saveData() {
+      if (role !== 'admin') return alert('ADMIN ONLY');
+      const d = {
+        kategori: document.getElementById('kategori').value || 'LAINNYA',
+        merk: document.getElementById('merk').value.trim(),
+        tipe: document.getElementById('tipe').value.trim(),
+        sn: document.getElementById('sn').value.trim() || '-',
+        lokasi: document.getElementById('lokasi').value.trim(),
+        status: document.getElementById('status').value,
+        keterangan: document.getElementById('keterangan').value.trim() || '-',
+        tanggal_input: new Date().toISOString().split('T')[0]
+      };
+      if (!d.kategori || !d.merk || !d.tipe || !d.lokasi) return alert('LENGKAPI DATA!');
+      db.ref('inventaris').push(d).then(() => {
+        alert('BARANG BERHASIL DITAMBAHKAN!');
+        showPage('assets');
+      });
+    }
+
     // Jalankan saat halaman dibuka
-    loadKategoriList();
+    loadKategoriDropdown();
   </script>
 </body>
 </html>
