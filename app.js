@@ -8,6 +8,9 @@ import {
 
 import { firebaseConfig } from "./firebase-config.js";
 
+// Sembunyikan halaman sampai status auth/role jelas (biar tidak terlihat kosong/flash)
+document.documentElement.style.visibility = "hidden";
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
@@ -19,7 +22,7 @@ const userInfo = el("userInfo");
 const roleInfo = el("roleInfo");
 const btnLogout = el("btnLogout");
 
-// Access UI
+// Access UI (kalau kamu masih punya card ini, akan tetap aman meski jarang terlihat karena kita redirect)
 const accessCard = el("accessCard");
 const myUid = el("myUid");
 
@@ -53,13 +56,24 @@ const search = el("search");
 
 let cache = [];
 let canWrite = false;
-let stopListener = null;
+let unsubscribeComputers = null;
 
-btnLogout.addEventListener("click", async () => {
+function showPage() {
+  document.documentElement.style.visibility = "visible";
+}
+
+function redirectToLogin(params = {}) {
+  const url = new URL("./login.html", window.location.href);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
+  // replace biar tombol Back tidak balik ke halaman yang langsung redirect lagi
+  window.location.replace(url.toString());
+}
+
+btnLogout?.addEventListener("click", async () => {
   try {
     await signOut(auth);
   } finally {
-    location.href = "./login.html";
+    redirectToLogin();
   }
 });
 
@@ -151,25 +165,23 @@ function render(rows) {
 
 function applyFilter() {
   const q = (search.value || "").trim().toLowerCase();
-  if (!q) {
-    render(cache);
-    return;
-  }
+  if (!q) return render(cache);
+
   const filtered = cache.filter((c) => {
     const hay = [
       c.assetTag, c.hostname, c.user, c.department, c.location, c.status, c.ip
     ].join(" ").toLowerCase();
     return hay.includes(q);
   });
+
   render(filtered);
 }
 
 function startComputersListener() {
-  // stop listener sebelumnya kalau ada
-  if (typeof stopListener === "function") stopListener();
+  if (typeof unsubscribeComputers === "function") unsubscribeComputers();
 
   const computersRef = ref(db, "computers");
-  stopListener = onValue(
+  unsubscribeComputers = onValue(
     computersRef,
     (snap) => {
       const val = snap.val() || {};
@@ -186,7 +198,6 @@ function startComputersListener() {
 }
 
 async function getRole(uid) {
-  // Baca boolean membership (rules sudah mengizinkan user membaca node miliknya sendiri)
   const [aSnap, sSnap] = await Promise.all([
     get(ref(db, `admins/${uid}`)),
     get(ref(db, `staff/${uid}`))
@@ -201,7 +212,7 @@ async function getRole(uid) {
 }
 
 // ===== CRUD (admin only) =====
-computerForm.addEventListener("submit", async (e) => {
+computerForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!canWrite) {
     formMsg.textContent = "Akun ini read-only.";
@@ -248,9 +259,9 @@ computerForm.addEventListener("submit", async (e) => {
   }
 });
 
-btnCancel.addEventListener("click", () => clearForm());
+btnCancel?.addEventListener("click", () => clearForm());
 
-tbody.addEventListener("click", async (e) => {
+tbody?.addEventListener("click", async (e) => {
   if (!canWrite) return;
 
   const btn = e.target.closest("button");
@@ -282,25 +293,24 @@ tbody.addEventListener("click", async (e) => {
   }
 });
 
-search.addEventListener("input", applyFilter);
+search?.addEventListener("input", applyFilter);
 
 // ===== Auth gate =====
 onAuthStateChanged(auth, async (u) => {
-  // reset UI
-  accessCard.hidden = true;
-  formCard.hidden = true;
-  listCard.hidden = true;
+  // Reset UI
+  accessCard && (accessCard.hidden = true);
+  formCard && (formCard.hidden = true);
+  listCard && (listCard.hidden = true);
   canWrite = false;
-  thActions.textContent = "Aksi";
 
   if (!u) {
-    if (typeof stopListener === "function") stopListener();
-    location.href = "./login.html";
+    if (typeof unsubscribeComputers === "function") unsubscribeComputers();
+    redirectToLogin();
     return;
   }
 
-  userInfo.textContent = u.email || u.uid;
-  myUid.textContent = u.uid;
+  userInfo && (userInfo.textContent = u.email || u.uid);
+  myUid && (myUid.textContent = u.uid);
 
   let role = "none";
   try {
@@ -310,21 +320,22 @@ onAuthStateChanged(auth, async (u) => {
     role = "none";
   }
 
-  roleInfo.textContent = role === "admin" ? "ADMIN" : role === "staff" ? "STAFF" : "NO ACCESS";
-
+  // Jika user belum masuk admins/staff => redirect ke login page
   if (role === "none") {
-    accessCard.hidden = false;
-    tbody.innerHTML = `<tr><td colspan="10" class="muted">Tidak ada akses.</td></tr>`;
+    // Simpan UID agar login page bisa menampilkan UID untuk dikirim ke admin
+    sessionStorage.setItem("pending_uid", u.uid);
+    redirectToLogin({ reason: "noaccess" });
     return;
   }
 
+  // Role ok, tampilkan halaman
   canWrite = role === "admin";
-  formCard.hidden = !canWrite;
-  listCard.hidden = false;
+  roleInfo && (roleInfo.textContent = role === "admin" ? "ADMIN" : "STAFF");
+  thActions && (thActions.textContent = canWrite ? "Aksi" : "Aksi (Read-only)");
 
-  if (!canWrite) {
-    thActions.textContent = "Aksi (Read-only)";
-  }
+  formCard && (formCard.hidden = !canWrite);
+  listCard && (listCard.hidden = false);
 
   startComputersListener();
+  showPage();
 });
