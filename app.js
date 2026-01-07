@@ -1,9 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getDatabase, ref, push, set, update, remove, onValue
+  getDatabase, ref, push, set, update, remove, onValue, get
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import {
-  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+  getAuth, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import { firebaseConfig } from "./firebase-config.js";
@@ -12,22 +12,25 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// ===== DOM =====
 const el = (id) => document.getElementById(id);
 
+// Header UI
+const userInfo = el("userInfo");
+const roleInfo = el("roleInfo");
+const btnLogout = el("btnLogout");
+
+// Access UI
+const accessCard = el("accessCard");
+const myUid = el("myUid");
+
+// Main UI
 const formCard = el("formCard");
 const listCard = el("listCard");
+const thActions = el("thActions");
 
-const btnLogin = el("btnLogin");
-const btnLogout = el("btnLogout");
-const authStatus = el("authStatus");
-
-const email = el("email");
-const password = el("password");
-
+// Form
 const computerForm = el("computerForm");
 const editingId = el("editingId");
-
 const assetTag = el("assetTag");
 const hostname = el("hostname");
 const user = el("user");
@@ -40,15 +43,34 @@ const storage = el("storage");
 const os = el("os");
 const ip = el("ip");
 const notes = el("notes");
-
 const btnSave = el("btnSave");
 const btnCancel = el("btnCancel");
 const formMsg = el("formMsg");
 
+// List
 const tbody = el("tbody");
 const search = el("search");
 
-let cache = []; // local list for filtering
+let cache = [];
+let canWrite = false;
+let stopListener = null;
+
+btnLogout.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+  } finally {
+    location.href = "./login.html";
+  }
+});
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
 function formatTime(ms) {
   if (!ms) return "-";
@@ -64,15 +86,6 @@ function specText(c) {
   if (c.storage) parts.push(c.storage);
   if (c.os) parts.push(c.os);
   return parts.join(" • ") || "-";
-}
-
-function escapeHtml(s) {
-  return String(s ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
 }
 
 function clearForm() {
@@ -112,6 +125,13 @@ function render(rows) {
 
   tbody.innerHTML = rows.map(({ id, ...c }) => {
     const badge = `<span class="badge">${escapeHtml(c.status || "-")}</span>`;
+    const actions = canWrite
+      ? `<div class="row">
+           <button data-action="edit" data-id="${escapeHtml(id)}" class="secondary">Edit</button>
+           <button data-action="del" data-id="${escapeHtml(id)}" class="danger">Hapus</button>
+         </div>`
+      : `<span class="muted">Read-only</span>`;
+
     return `
       <tr>
         <td><strong>${escapeHtml(c.assetTag || "-")}</strong></td>
@@ -123,12 +143,7 @@ function render(rows) {
         <td>${escapeHtml(specText(c))}</td>
         <td>${escapeHtml(c.ip || "-")}</td>
         <td class="muted">${escapeHtml(formatTime(c.updatedAt))}</td>
-        <td>
-          <div class="row">
-            <button data-action="edit" data-id="${escapeHtml(id)}" class="secondary">Edit</button>
-            <button data-action="del" data-id="${escapeHtml(id)}" class="danger">Hapus</button>
-          </div>
-        </td>
+        <td>${actions}</td>
       </tr>
     `;
   }).join("");
@@ -140,47 +155,26 @@ function applyFilter() {
     render(cache);
     return;
   }
-
   const filtered = cache.filter((c) => {
     const hay = [
       c.assetTag, c.hostname, c.user, c.department, c.location, c.status, c.ip
     ].join(" ").toLowerCase();
     return hay.includes(q);
   });
-
   render(filtered);
 }
 
-// ===== Auth handlers =====
-btnLogin.addEventListener("click", async () => {
-  authStatus.textContent = "Logging in...";
-  try {
-    await signInWithEmailAndPassword(auth, email.value.trim(), password.value);
-    authStatus.textContent = "Login OK.";
-    password.value = "";
-  } catch (e) {
-    console.error(e);
-    authStatus.textContent = `Login gagal: ${e?.message || e}`;
-  }
-});
-
-btnLogout.addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-  } catch (e) {
-    console.error(e);
-  }
-});
-
-// ===== Database listeners =====
 function startComputersListener() {
+  // stop listener sebelumnya kalau ada
+  if (typeof stopListener === "function") stopListener();
+
   const computersRef = ref(db, "computers");
-  onValue(
+  stopListener = onValue(
     computersRef,
     (snap) => {
       const val = snap.val() || {};
       const rows = Object.entries(val).map(([id, data]) => ({ id, ...data }));
-      rows.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)); // terbaru dulu
+      rows.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
       cache = rows;
       applyFilter();
     },
@@ -191,29 +185,29 @@ function startComputersListener() {
   );
 }
 
-onAuthStateChanged(auth, (u) => {
-  const loggedIn = !!u;
-  btnLogout.disabled = !loggedIn;
-  btnLogin.disabled = loggedIn;
+async function getRole(uid) {
+  // Baca boolean membership (rules sudah mengizinkan user membaca node miliknya sendiri)
+  const [aSnap, sSnap] = await Promise.all([
+    get(ref(db, `admins/${uid}`)),
+    get(ref(db, `staff/${uid}`))
+  ]);
 
-  formCard.hidden = !loggedIn;
-  listCard.hidden = !loggedIn;
+  const isAdmin = aSnap.exists() && aSnap.val() === true;
+  const isStaff = sSnap.exists() && sSnap.val() === true;
 
-  authStatus.textContent = loggedIn
-    ? `Login sebagai: ${u.email || u.uid}`
-    : "Belum login.";
+  if (isAdmin) return "admin";
+  if (isStaff) return "staff";
+  return "none";
+}
 
-  if (loggedIn) startComputersListener();
-  if (!loggedIn) {
-    cache = [];
-    render([]);
-    clearForm();
-  }
-});
-
-// ===== CRUD =====
+// ===== CRUD (admin only) =====
 computerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (!canWrite) {
+    formMsg.textContent = "Akun ini read-only.";
+    return;
+  }
+
   formMsg.textContent = "";
 
   const payload = {
@@ -257,6 +251,8 @@ computerForm.addEventListener("submit", async (e) => {
 btnCancel.addEventListener("click", () => clearForm());
 
 tbody.addEventListener("click", async (e) => {
+  if (!canWrite) return;
+
   const btn = e.target.closest("button");
   if (!btn) return;
 
@@ -287,3 +283,48 @@ tbody.addEventListener("click", async (e) => {
 });
 
 search.addEventListener("input", applyFilter);
+
+// ===== Auth gate =====
+onAuthStateChanged(auth, async (u) => {
+  // reset UI
+  accessCard.hidden = true;
+  formCard.hidden = true;
+  listCard.hidden = true;
+  canWrite = false;
+  thActions.textContent = "Aksi";
+
+  if (!u) {
+    if (typeof stopListener === "function") stopListener();
+    location.href = "./login.html";
+    return;
+  }
+
+  userInfo.textContent = u.email || u.uid;
+  myUid.textContent = u.uid;
+
+  let role = "none";
+  try {
+    role = await getRole(u.uid);
+  } catch (err) {
+    console.error(err);
+    role = "none";
+  }
+
+  roleInfo.textContent = role === "admin" ? "ADMIN" : role === "staff" ? "STAFF" : "NO ACCESS";
+
+  if (role === "none") {
+    accessCard.hidden = false;
+    tbody.innerHTML = `<tr><td colspan="10" class="muted">Tidak ada akses.</td></tr>`;
+    return;
+  }
+
+  canWrite = role === "admin";
+  formCard.hidden = !canWrite;
+  listCard.hidden = false;
+
+  if (!canWrite) {
+    thActions.textContent = "Aksi (Read-only)";
+  }
+
+  startComputersListener();
+});
