@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>INVENTARIS 2025</title>
-  <link rel="stylesheet" href="https://snsubumumjaya.github.io/InventarisKomputer/style.css" />
+  <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
@@ -12,7 +12,7 @@
   <div class="loader">"LOADING INVENTORY DATABASE..."</div>
 
   <script>
-    const firebaseConfig = { /* config kamu */ 
+    const firebaseConfig = {
       apiKey: "AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",
       authDomain: "inventariskomputer.firebaseapp.com",
       databaseURL: "https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -26,12 +26,8 @@
 
     auth.onAuthStateChanged(user => {
       setTimeout(() => {
-        if (user) {
-          location.href = "dashboard.html";
-        } else {
-          location.href = "login.html";
-        }
-      }, 2000);
+        location.href = user ? "dashboard.html" : "login.html";
+      }, 2500);
     });
   </script>
 </body>
