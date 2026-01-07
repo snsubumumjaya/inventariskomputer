@@ -8,35 +8,35 @@
 </head>
 <body>
   <header class="container">
-    <h1>Inventaris Komputer</h1>
-    <p class="muted">GitHub Pages + Firebase Realtime Database</p>
+    <div class="row space">
+      <div>
+        <h1>Inventaris Komputer</h1>
+        <p class="muted">Admin: CRUD • Staff: read-only</p>
+      </div>
+      <div class="row">
+        <span id="userInfo" class="muted"></span>
+        <span id="roleInfo" class="badge"></span>
+        <button id="btnLogout" class="secondary">Logout</button>
+      </div>
+    </div>
   </header>
 
   <main class="container">
-    <!-- Login -->
-    <section class="card" id="authCard">
-      <h2>Login Admin</h2>
-      <div class="grid2">
-        <label>
-          Email
-          <input id="email" type="email" autocomplete="username" placeholder="admin@contoh.com">
-        </label>
-        <label>
-          Password
-          <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
-        </label>
-      </div>
-      <div class="row">
-        <button id="btnLogin">Login</button>
-        <button id="btnLogout" class="secondary" disabled>Logout</button>
-        <span id="authStatus" class="muted"></span>
-      </div>
-      <p class="muted small">
-        Data inventaris harus dilindungi oleh Firebase Authentication + Security Rules.
+    <section class="card" id="accessCard" hidden>
+      <h2>Akses belum diberikan</h2>
+      <p class="muted">
+        Akun kamu sudah login, tapi belum terdaftar sebagai <code>staff</code> atau <code>admin</code> di database.
       </p>
+      <p class="muted small">
+        Berikan UID berikut ke admin:
+      </p>
+      <code id="myUid"></code>
+      <div class="row">
+        <a class="link" href="./login.html">Kembali ke halaman login</a>
+      </div>
     </section>
 
-    <!-- Form input -->
+    <!-- Form input (admin only) -->
     <section class="card" id="formCard" hidden>
       <h2>Tambah / Edit Komputer</h2>
 
@@ -104,7 +104,7 @@
       </form>
     </section>
 
-    <!-- List -->
+    <!-- List (admin & staff) -->
     <section class="card" id="listCard" hidden>
       <div class="row space">
         <h2>Daftar Komputer</h2>
@@ -124,11 +124,11 @@
               <th>Spesifikasi</th>
               <th>IP</th>
               <th>Update</th>
-              <th>Aksi</th>
+              <th id="thActions">Aksi</th>
             </tr>
           </thead>
           <tbody id="tbody">
-            <tr><td colspan="10" class="muted">Belum ada data.</td></tr>
+            <tr><td colspan="10" class="muted">Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -136,7 +136,7 @@
   </main>
 
   <footer class="container muted small">
-    Dibuat dengan Firebase Realtime Database + GitHub Pages.
+    GitHub Pages + Firebase Realtime Database.
   </footer>
 
   <script type="module" src="./app.js"></script>
