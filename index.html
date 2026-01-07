@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Inventaris Komputer</title>
+  <title>INVENTARIS 2025</title>
+  <link rel="stylesheet" href="https://snsubumumjaya.github.io/InventarisKomputer/style.css" />
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body class="loading">
+  <div class="loader">"LOADING INVENTORY DATABASE..."</div>
 
   <script>
-    const firebaseConfig = {
+    const firebaseConfig = { /* config kamu */ 
       apiKey: "AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",
       authDomain: "inventariskomputer.firebaseapp.com",
       databaseURL: "https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -18,21 +21,18 @@
       messagingSenderId: "915927761008",
       appId: "1:915927761008:web:a4b2e71159d00501fdf4b5"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.database();
 
     auth.onAuthStateChanged(user => {
-      if (user) {
-        location.href = "dashboard.html";
-      } else {
-        location.href = "login.html";
-      }
+      setTimeout(() => {
+        if (user) {
+          location.href = "dashboard.html";
+        } else {
+          location.href = "login.html";
+        }
+      }, 2000);
     });
   </script>
-</head>
-<body style="font-family:Arial;text-align:center;padding:100px;background:#f0f2f5">
-  <h2>Sedang memeriksa login...</h2>
 </body>
 </html>
