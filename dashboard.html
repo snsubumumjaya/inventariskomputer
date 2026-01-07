@@ -23,9 +23,9 @@
       background-size:180px 180px;opacity:0.07;pointer-events:none;
     }
 
-    /* SIDEBAR — MINIMAL TAPI GANTENG */
+    /* SIDEBAR FULL SAMPE BAWAH */
     .sidebar{
-      position:fixed;left:0;top:0;bottom:80px;width:300px;background:#000;color:#fff;
+      position:fixed;left:0;top:0;bottom:0;width:300px;background:#000;color:#fff;
       padding:60px 50px;z-index:999;box-shadow:50px 0 80px rgba(0,0,0,0.4);
     }
     .logo{
@@ -49,9 +49,9 @@
     }
     .menu-item:hover::before,.menu-item.active::before{width:40px}
 
-    /* MAIN CONTENT — JARAK DARI SIDEBAR LEBIH JAUH */
+    /* MAIN CONTENT */
     .main{
-      margin-left:300px;padding:140px 100px 200px;min-height:100vh;
+      margin-left:300px;padding:140px 100px 140px;min-height:100vh;
     }
     .content{display:none}
     .content.active{display:block}
@@ -59,16 +59,12 @@
       font-size:64px;font-weight:900;letter-spacing:-6px;line-height:0.95;margin-bottom:80px;
     }
 
-    /* TABLE — MINIMAL TAPI JELAS */
+    /* TABLE */
     table{width:100%;border-collapse:separate;border-spacing:0 35px}
-    th{
-      font-size:12px;letter-spacing:6px;text-transform:uppercase;opacity:0.7;padding-bottom:25px;
-    }
-    td{
-      font-size:19px;font-weight:400;padding:25px 0;border-bottom:5px solid #000;
-    }
+    th{font-size:12px;letter-spacing:6px;text-transform:uppercase;opacity:0.7;padding-bottom:25px}
+    td{font-size:19px;font-weight:400;padding:25px 0;border-bottom:5px solid #000}
 
-    /* FORM — SUPER MINIMAL */
+    /* FORM */
     .form-box{
       max-width:900px;background:#fafafa;padding:80px 100px;border:8px solid #000;margin:100px 0;
     }
@@ -96,16 +92,17 @@
     }
     .logout-btn:hover{background:#000;color:#fff}
 
-    /* FOOTER — GAK TERPOTONG SIDEBAR */
+    /* FOOTER CUMA TULISAN HITAM DOANG — TANPA BOX HITAM */
     .footer{
-      position:fixed;bottom:0;left:0;right:0;background:#000;color:#fff;
-      padding:40px;text-align:center;font-size:16px;letter-spacing:18px;font-weight:900;
-      border-top:12px solid #fff;z-index:1000;
+      position:fixed;bottom:30px;left:300px;right:0;text-align:center;
+      font-size:14px;letter-spacing:8px;font-weight:900;color:#000;
+      z-index:1000;
     }
   </style>
 </head>
 <body>
 
+  <!-- SIDEBAR FULL SAMPE BAWAH -->
   <div class="sidebar">
     <div class="logo">
       <h1>INVENTARIS<br>KOMPUTER</h1>
@@ -149,6 +146,7 @@
     </div>
   </div>
 
+  <!-- FOOTER CUMA TULISAN HITAM DOANG -->
   <div class="footer">
     SN SUB UMUM – INTERNAL INVENTORY SYSTEM 2026
   </div>
