@@ -3,178 +3,231 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inventaris Komputer</title>
+  <title>SN SUB UMUM – 2026</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{
-      font-family:Arial,sans-serif;background:#f4f6f9;margin:0;padding:20px;
-      background-image:
-        linear-gradient(rgba(0,0,0,.02) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(0,0,0,.02) 1px,transparent 1px);
-      background-size:40px 40px;
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;margin:0;background:#fff;color:#000;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;overflow-x:hidden}
+    
+    /* GRID INDUSTRIAL OFF-WHITE */
+    body::before{
+      content:"";position:fixed;inset:0;z-index:-1;
+      background:
+        linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px);
+      background-size:60px 60px;pointer-events:none;
     }
-    .container{max-width:1100px;margin:auto;background:white;padding:40px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.1)}
-    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:40px;padding-bottom:20px;border-bottom:3px solid #000}
-    h1{font-size:48px;font-weight:900}
-    button{padding:12px 24px;border:none;border-radius:6px;color:white;cursor:pointer;font-size:14px}
-    .btn-add{background:#28a745}
-    .btn-edit{background:#007bff}
-    .btn-delete{background:#dc3545;margin-left:8px}
-    table{width:100%;border-collapse:collapse;margin-top:20px}
-    th,td{border:1px solid #ddd;padding:16px;text-align:left}
-    th{background:#007bff;color:white;font-size:14px}
-    tr:nth-child(even){background:#f9f9f9}
-    .form{background:#f8f9fa;padding:40px;border-radius:8px;margin:40px 0;display:none}
-    input{padding:14px;margin:8px 0;width:100%;border-radius:6px;border:1px solid #ddd;font-size:16px}
-    .status-baik{color:green;font-weight:bold}
-    .status-rusak{color:red;font-weight:bold}
+    body::after{
+      content:"";position:fixed;inset:0;z-index:-1;
+      background:
+        linear-gradient(#000 4px,transparent 4px),
+        linear-gradient(90deg,#000 4px,transparent 4px);
+      background-size:300px 300px;opacity:0.06;pointer-events:none;
+    }
+
+    /* SIDEBAR HITAM BRUTAL */
+    .sidebar{
+      position:fixed;left:0;top:0;bottom:0;width:400px;background:#000;color:#fff;
+      padding:120px 80px;z-index:999;box-shadow:80px 0 120px rgba(0,0,0,0.6);
+    }
+    .logo{
+      margin-bottom:160px;
+    }
+    .logo h1{
+      font-size:68px;font-weight:900;letter-spacing:-7px;line-height:0.88;
+      background:#fff;color:#000;padding:50px 60px;display:inline-block;
+      border:12px solid #000;box-shadow:20px 20px 0 #000;
+    }
+    .menu-item{
+      font-size:26px;font-weight:900;letter-spacing:-1px;margin:50px 0;
+      cursor:pointer;transition:all .4s;opacity:0.8;padding-left:0;position:relative;
+    }
+    .menu-item:hover,.menu-item.active{
+      opacity:1;padding-left:40px;
+    }
+    .menu-item::before{
+      content:"";position:absolute;left:0;top:50%;width:0;height:6px;background:#fff;
+      transition:all .4s;transform:translateY(-50%);
+    }
+    .menu-item:hover::before,.menu-item.active::before{width:70px}
+
+    /* MAIN CONTENT */
+    .main{
+      margin-left:400px;padding:140px 160px 400px;min-height:100vh;
+    }
+    .content{display:none}
+    .content.active{display:block}
+    h2{
+      font-size:120px;font-weight:900;letter-spacing:-12px;line-height:0.88;margin-bottom:120px;
+    }
+
+    /* TABLE OFF-WHITE */
+    table{width:100%;border-collapse:separate;border-spacing:0 60px}
+    th{
+      font-size:14px;letter-spacing:12px;text-transform:uppercase;opacity:0.7;padding-bottom:50px;
+    }
+    td{
+      font-size:32px;font-weight:400;padding:50px 0;border-bottom:10px solid #000;
+    }
+
+    /* FORM */
+    .form-box{
+      max-width:1200px;background:#fafafa;padding:160px 180px;border:14px solid #000;margin:160px 0;
+    }
+    .form-box input{
+      width:100%;padding:40px 0;background:none;border:none;border-bottom:8px solid #000;
+      font-size:36px;margin:80px 0;outline:none;
+    }
+
+    /* BUTTON */
+    .btn{
+      padding:30px 100px;background:#000;color:#fff;font-size:24px;font-weight:900;
+      letter-spacing:10px;border:none;cursor:pointer;transition:.4s
+    }
+    .btn:hover{background:#ff0000}
+
+    /* USER INFO */
+    .user-info{
+      position:fixed;right:120px;top:100px;z-index:999;background:#fff;
+      padding:25px 50px;border:10px solid #000;font-size:18px;letter-spacing:10px;font-weight:900;
+    }
+
+    /* FOOTER 2026 */
     .footer{
-      margin-top:100px;text-align:center;padding:30px;font-size:18px;font-weight:bold;
-      letter-spacing:5px;border-top:4px solid #000
+      position:fixed;bottom:0;left:0;right:0;background:#000;color:#fff;
+      padding:70px;text-align:center;font-size:24px;letter-spacing:28px;font-weight:900;
+      border-top:20px solid #fff;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Inventaris Komputer</h1>
-      <div>
-        <span id="userInfo" style="margin-right:20px;font-weight:bold"></span>
-        <button onclick="firebase.auth().signOut().then(()=>location.href='login.html')" style="background:#dc3545">Logout</button>
+
+  <!-- SIDEBAR OFF-WHITE -->
+  <div class="sidebar">
+    <div class="logo">
+      <h1>INVENTARIS<br>KOMPUTER</h1>
+    </div>
+    <div class="menu-item active" onclick="showPage('home')">HOME</div>
+    <div class="menu-item" onclick="showPage('assets')">SEMUA ASSET</div>
+    <div class="menu-item" id="menuAdd" onclick="showPage('add')">+ TAMBAH BARANG</div>
+    <div class="menu-item" onclick="alert('2026')">RUSAK / HILANG</div>
+    <div class="menu-item" id="menuReport" onclick="alert('2026')">EXPORT PDF</div>
+  </div>
+
+  <div class="user-info">
+    <span id="userInfo"></span>
+  </div>
+
+  <div class="main">
+    <div id="home" class="content active">
+      <h2>DASHBOARD<br>2026</h2>
+    </div>
+
+    <div id="assets" class="content">
+      <h2>SEMUA<br>ASSET</h2>
+      <table>
+        <thead><tr><th>CODE</th><th>BRAND</th><th>MODEL</th><th>LOCATION</th><th>STATUS</th><th id="aksiHeader" style="display:none">ACTION</th></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="add" class="content">
+      <h2 id="formTitle">TAMBAH<br>BARANG</h2>
+      <div class="form-box">
+        <input type="text" id="kode" placeholder="KODE ASSET">
+        <input type="text" id="merk" placeholder="MERK">
+        <input type="text" id="tipe" placeholder="TIPE">
+        <input type="text" id="lokasi" placeholder="LOKASI">
+        <input type="text" id="status" placeholder="STATUS" value="OPERATIONAL">
+        <br><br>
+        <button class="btn" onclick="saveData()">SIMPAN</button>
       </div>
-    </div>
-
-    <div id="adminOnly" style="display:none;margin-bottom:30px">
-      <button class="btn-add" onclick="showForm()">+ Tambah Komputer</button>
-    </div>
-
-    <div id="formInput" class="form">
-      <h3 id="formTitle">Tambah Komputer Baru</h3>
-      <input type="text" id="kode" placeholder="Kode Asset" required />
-      <input type="text" id="merk" placeholder="Merk" required />
-      <input type="text" id="tipe" placeholder="Tipe / Spek" required />
-      <input type="text" id="lokasi" placeholder="Lokasi / Ruang" required />
-      <input type="text" id="status" placeholder="Status" value="Baik" />
-      <br><br>
-      <button class="btn-add" onclick="saveData()">Simpan</button>
-      <button onclick="document.getElementById('formInput').style.display='none'" style="background:#666;margin-left:10px">Batal</button>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Kode</th>
-          <th>Merk</th>
-          <th>Tipe</th>
-          <th>Lokasi</th>
-          <th>Status</th>
-          <th id="aksiHeader" style="display:none">Aksi</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-
-    <div class="footer">
-      SN SUB UMUM – INTERNAL INVENTORY SYSTEM 2026
     </div>
   </div>
 
+  <div class="footer">
+    SN SUB UMUM – INTERNAL INVENTORY SYSTEM 2026
+  </div>
+
   <script>
-    firebase.initializeApp({
-      apiKey: "AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",
-      authDomain: "inventariskomputer.firebaseapp.com",
-      databaseURL: "https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "inventariskomputer",
-      storageBucket: "inventariskomputer.firebasestorage.app",
-      messagingSenderId: "915927761008",
-      appId: "1:915927761008:web:a4b2e71159d00501fdf4b5"
-    });
+    firebase.initializeApp({apiKey:"AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",authDomain:"inventariskomputer.firebaseapp.com",databaseURL:"https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inventariskomputer",storageBucket:"inventariskomputer.firebasestorage.app",messagingSenderId:"915927761008",appId:"1:915927761008:web:a4b2e71159d00501fdf4b5"});
+    const auth=firebase.auth();const db=firebase.database();let role='staff',ek=null;
 
-    const auth = firebase.auth();
-    const db = firebase.database();
-    let role = 'staff';
-    let editingKey = null;
-
-    auth.onAuthStateChanged(user => {
-      if (!user) return location.href = "login.html";
-
-      db.ref('users/' + user.uid).once('value').then(snap => {
-        const data = snap.val();
-        role = data.role || 'staff';
-        document.getElementById('userInfo').innerText = `${data.nama} (${role.toUpperCase()})`;
-
-        if (role === 'admin') {
-          document.getElementById('adminOnly').style.display = 'block';
-          document.getElementById('aksiHeader').style.display = 'table-cell';
+    auth.onAuthStateChanged(u=>{
+      if(!u) location.href="login.html";
+      db.ref('users/'+u.uid).once('value').then(s=>{
+        const d=s.val();role=d.role||'staff';
+        document.getElementById('userInfo').innerText = d.nama + " – " + role.toUpperCase();
+        if(role==='admin'){
+          document.getElementById('menuAdd').style.display='block';
+          document.getElementById('menuReport').style.display='block';
+          document.getElementById('aksiHeader').style.display='table-cell';
         }
       });
+    });
 
-      db.ref('inventaris').on('value', snap => {
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-        if (!snap.exists()) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:80px">Belum ada data</td></tr>';
-          return;
-        }
-        snap.forEach(child => {
-          const item = child.val();
-          const key = child.key;
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${item.kode}</td>
-            <td>${item.merk}</td>
-            <td>${item.tipe}</td>
-            <td>${item.lokasi}</td>
-            <td><span class="status-${item.status.toLowerCase()}">${item.status}</span></td>
-            <td style="display:${role==='admin'?'table-cell':'none'}">
-              <button class="btn-edit" onclick="editItem('${key}',${JSON.stringify(item)})">Edit</button>
-              <button class="btn-delete" onclick="if(confirm('Yakin hapus?'))db.ref('inventaris/${key}').remove()">Hapus</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
+    function showPage(p){
+      document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+      document.getElementById(p).classList.add('active');
+      document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(m=>{
+        if(m.onclick.toString().includes(p)) m.classList.add('active');
+      });
+      if(p==='assets') loadTable();
+      if(p==='add') clearForm();
+    }
+
+    function loadTable(){
+      db.ref('inventaris').on('value',s=>{
+        const t=document.getElementById('tableBody');t.innerHTML='';
+        if(!s.exists()){t.innerHTML='<tr><td colspan="6" style="text-align:center;padding:300px;font-size:48px;opacity:0.2">NO DATA</td></tr>';return;}
+        s.forEach(c=>{
+          const i=c.val();const k=c.key;
+          const r=document.createElement('tr');
+          r.innerHTML=`<td>${i.kode}</td><td>${i.merk}</td><td>${i.tipe}</td><td>${i.lokasi}</td><td>${i.status}</td>
+            <td style="display:${role==='admin'?'':'none'}">
+              <button class="btn" style="padding:25px 50px" onclick="edit('${k}',${JSON.stringify(i)})">EDIT</button>
+              <button class="btn" style="background:#ff0000;margin-left:30px;padding:25px 50px" onclick="if(confirm('DELETE?'))db.ref('inventaris/${k}').remove()">DELETE</button>
+            </td>`;
+          t.appendChild(r);
         });
       });
-    });
+    }
 
-    window.showForm = () => {
-      if (role !== 'admin') return alert('Hanya admin!');
-      editingKey = null;
-      document.getElementById('formTitle').innerText = "Tambah Komputer Baru";
-      document.getElementById('formInput').style.display = 'block';
-      document.getElementById('kode').value = '';
-      document.getElementById('merk').value = '';
-      document.getElementById('tipe').value = '';
-      document.getElementById('lokasi').value = '';
-      document.getElementById('status').value = 'Baik';
-    };
+    function clearForm(){
+      ek=null;
+      document.getElementById('formTitle').innerText='TAMBAH\nBARANG';
+      document.getElementById('kode').value='';document.getElementById('merk').value='';
+      document.getElementById('tipe').value='';document.getElementById('lokasi').value='';
+      document.getElementById('status').value='OPERATIONAL';
+    }
 
-    window.editItem = (key, item) => {
-      editingKey = key;
-      document.getElementById('formTitle').innerText = "Edit Komputer";
-      document.getElementById('formInput').style.display = 'block';
-      document.getElementById('kode').value = item.kode;
-      document.getElementById('merk').value = item.merk;
-      document.getElementById('tipe').value = item.tipe;
-      document.getElementById('lokasi').value = item.lokasi;
-      document.getElementById('status').value = item.status;
-    };
+    function edit(k,i){
+      ek=k;
+      showPage('add');
+      document.getElementById('formTitle').innerText='EDIT\nDATA';
+      document.getElementById('kode').value=i.kode;
+      document.getElementById('merk').value=i.merk;
+      document.getElementById('tipe').value=i.tipe;
+      document.getElementById('lokasi').value=i.lokasi;
+      document.getElementById('status').value=i.status;
+    }
 
-    window.saveData = () => {
-      if (role !== 'admin') return;
-      const data = {
-        kode: document.getElementById('kode').value,
-        merk: document.getElementById('merk').value,
-        tipe: document.getElementById('tipe').value,
-        lokasi: document.getElementById('lokasi').value,
-        status: document.getElementById('status').value,
+    function saveData(){
+      if(role!=='admin') return alert('ADMIN ONLY');
+      const d={
+        kode:document.getElementById('kode').value.trim(),
+        merk:document.getElementById('merk').value.trim(),
+        tipe:document.getElementById('tipe').value.trim(),
+        lokasi:document.getElementById('lokasi').value.trim(),
+        status:document.getElementById('status').value.trim()
       };
-      const key = editingKey || Date.now().toString();
-      db.ref('inventaris/' + key).set(data);
-      document.getElementById('formInput').style.display = 'none';
-    };
+      if(!d.kode||!d.merk) return alert('KODE & MERK WAJIB!');
+      const k=ek||Date.now();
+      db.ref('inventaris/'+k).set(d).then(()=>{alert('SAVED');showPage('assets');});
+    }
   </script>
 </body>
 </html>
