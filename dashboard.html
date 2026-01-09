@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SN SUB UMUM – 2026</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
     html,body{height:100%;margin:0;background:#fff;color:#000;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;overflow-x:hidden}
-    
+   
     /* GRID INDUSTRIAL MINIMAL */
     body::before{
       content:"";position:fixed;inset:0;z-index:-1;
@@ -22,7 +22,6 @@
       background:linear-gradient(#000 2px,transparent 2px),linear-gradient(90deg,#000 2px,transparent 2px);
       background-size:180px 180px;opacity:0.07;pointer-events:none;
     }
-
     /* SIDEBAR FULL SAMPE BAWAH */
     .sidebar{
       position:fixed;left:0;top:0;bottom:0;width:300px;background:#000;color:#fff;
@@ -45,18 +44,15 @@
       transition:all .35s;
     }
     .menu-item:hover::after,.menu-item.active::after{width:40px}
-
     /* MAIN CONTENT */
     .main{margin-left:300px;padding:140px 100px 140px;min-height:100vh}
     .content{display:none}
     .content.active{display:block}
     h2{font-size:64px;font-weight:900;letter-spacing:-6px;line-height:0.95;margin-bottom:80px}
-
     /* TABLE */
     table{width:100%;border-collapse:separate;border-spacing:0 35px}
     th{font-size:12px;letter-spacing:6px;text-transform:uppercase;opacity:0.7;padding-bottom:25px}
     td{font-size:19px;font-weight:400;padding:25px 0;border-bottom:5px solid #000}
-
     /* FORM */
     .form-box{
       max-width:900px;background:#fafafa;padding:80px 100px;border:8px solid #000;margin:100px 0;
@@ -65,14 +61,12 @@
       width:100%;padding:20px 0;background:none;border:none;border-bottom:5px solid #000;
       font-size:22px;margin:40px 0;outline:none;
     }
-
     /* BUTTON */
     .btn{
       padding:16px 55px;background:#000;color:#fff;font-size:15px;font-weight:900;
       letter-spacing:5px;border:none;cursor:pointer;transition:.35s;margin-right:15px;
     }
     .btn:hover{background:#ff0000}
-
     /* USER INFO + LOGOUT */
     .user-info{
       position:fixed;right:70px;top:60px;z-index:999;background:#fff;
@@ -84,7 +78,6 @@
       font-weight:900;letter-spacing:5px;cursor:pointer;transition:.35s;
     }
     .logout-btn:hover{background:#000;color:#fff}
-
     /* FOOTER TULISAN HITAM DOANG */
     .footer{
       position:fixed;bottom:30px;left:300px;right:0;text-align:center;
@@ -94,7 +87,6 @@
   </style>
 </head>
 <body>
-
   <div class="sidebar">
     <div class="logo">
       <h1>INVENTARIS<br>KOMPUTER</h1>
@@ -105,18 +97,14 @@
     <div class="menu-item" id="menuKategori" style="display:none" onclick="showPage('kategori')">KELOLA KATEGORI</div>
     <div class="menu-item" onclick="alert('2026')">RUSAK / HILANG</div>
   </div>
-
   <div class="user-info">
     <span id="userInfo">LOADING...</span>
     <button class="logout-btn" onclick="firebase.auth().signOut().then(()=>location.href='login.html')">LOGOUT</button>
   </div>
-
   <div class="main">
-
     <div id="home" class="content active">
       <h2>DASHBOARD<br>2026</h2>
     </div>
-
     <div id="assets" class="content">
       <h2>SEMUA<br>ASSET</h2>
       <table>
@@ -124,7 +112,6 @@
         <tbody id="tableBody"></tbody>
       </table>
     </div>
-
     <div id="add" class="content">
       <h2>TAMBAH<br>BARANG</h2>
       <div class="form-box">
@@ -146,8 +133,6 @@
         <button class="btn" onclick="saveData()">SIMPAN</button>
       </div>
     </div>
-
-    <!-- KELOLA KATEGORI — TABEL DENGAN ISI OTOMATIS -->
     <div id="kategori" class="content">
       <h2>KELOLA<br>KATEGORI</h2>
       <div class="form-box">
@@ -159,9 +144,7 @@
               <th style="text-align:left;font-size:14px;letter-spacing:6px;opacity:0.7">NAMA KATEGORI</th>
             </tr>
           </thead>
-          <tbody id="kategoriTableBody">
-            <!-- ISI OTOMATIS DARI FIREBASE -->
-          </tbody>
+          <tbody id="kategoriTableBody"></tbody>
         </table>
         <p style="margin-top:60px;opacity:0.6;font-size:16px">
           Fitur tambah/edit/hapus kategori sementara dinonaktifkan.<br>
@@ -169,23 +152,27 @@
         </p>
       </div>
     </div>
-
   </div>
-
   <div class="footer">
     SN SUB UMUM – INTERNAL INVENTORY SYSTEM 2026
   </div>
-
   <script>
-    firebase.initializeApp({apiKey:"AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",authDomain:"inventariskomputer.firebaseapp.com",databaseURL:"https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inventariskomputer",storageBucket:"inventariskomputer.firebasestorage.app",messagingSenderId:"915927761008",appId:"1:915927761008:web:a4b2e71159d00501fdf4b5"});
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",
+      authDomain: "inventariskomputer.firebaseapp.com",
+      databaseURL: "https://inventariskomputer-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inventariskomputer",
+      storageBucket: "inventariskomputer.firebasestorage.app",
+      messagingSenderId: "915927761008",
+      appId: "1:915927761008:web:a4b2e71159d00501fdf4b5"
+    };
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
     let role = 'staff';
 
     // Default kategori
     const defaultKategori = ["Laptop","PC Desktop","Monitor","Printer","Aksesoris","Jaringan","Lainnya"];
-
-    // Buat default kategori kalau kosong
     db.ref('kategori').once('value').then(snap => {
       if (!snap.exists() || Object.keys(snap.val() || {}).length === 0) {
         defaultKategori.forEach(nama => {
@@ -194,8 +181,19 @@
       }
     });
 
+    // PENGECEKAN AUTH + EMAIL VERIFICATION
     auth.onAuthStateChanged(u => {
-      if (!u) location.href = "login.html";
+      if (!u) {
+        location.href = "login.html";
+        return;
+      }
+      if (!u.emailVerified) {
+        auth.signOut().then(() => {
+          location.href = "login.html?msg=verify";
+        });
+        return;
+      }
+      // Kalau sudah verified, lanjut load role
       db.ref('users/' + u.uid).once('value').then(s => {
         const d = s.val();
         role = d.role || 'staff';
@@ -205,37 +203,32 @@
           document.getElementById('menuKategori').style.display = 'block';
           document.getElementById('aksiHeader').style.display = 'table-cell';
         }
+        // Load default page
+        showPage('home');
       });
     });
 
-    // SPA PALING AMAN DI DUNIA
     function showPage(id) {
       document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
       document.getElementById(id).classList.add('active');
-      
       document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
       const activeMenu = Array.from(document.querySelectorAll('.menu-item')).find(m => m.onclick && m.onclick.toString().includes(id));
       if (activeMenu) activeMenu.classList.add('active');
-
       if (id === 'kategori') loadKategoriTable();
       if (id === 'assets') loadTable();
       if (id === 'add') loadKategoriDropdown();
     }
 
-    // Load kategori untuk tabel kelola kategori
     function loadKategoriTable() {
       const tbody = document.getElementById('kategoriTableBody');
       tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:100px;opacity:0.5">Loading kategori...</td></tr>';
-
       db.ref('kategori').on('value', snap => {
         const data = snap.val();
         tbody.innerHTML = '';
-
         if (!data || Object.keys(data).length === 0) {
           tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:100px;opacity:0.5">BELUM ADA KATEGORI</td></tr>';
           return;
         }
-
         let no = 1;
         Object.keys(data).forEach(key => {
           const nama = data[key].nama || 'Unknown';
@@ -246,12 +239,10 @@
       });
     }
 
-    // Load kategori untuk dropdown tambah barang
     function loadKategoriDropdown() {
       const select = document.getElementById('kategori');
       select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
-
-      db.ref('kategori').on('value', snap => {
+      db.ref('kategori').once('value', snap => {  // ubah ke once biar lebih cepat
         const data = snap.val() || {};
         Object.keys(data).forEach(key => {
           const opt = document.createElement('option');
@@ -262,11 +253,9 @@
       });
     }
 
-    // Load table asset
     function loadTable() {
       const tbody = document.getElementById('tableBody');
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:180px;opacity:0.2">Loading...</td></tr>';
-
       db.ref('inventaris').on('value', snap => {
         tbody.innerHTML = '';
         if (!snap.exists()) {
@@ -276,10 +265,10 @@
         snap.forEach(c => {
           const i = c.val();
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${i.kategori||'LAINNYA'}</td><td>${i.merk||''}</td><td>${i.tipe||''}</td><td>${i.sn||'-'}</td><td>${i.lokasi||''}</td><td>${i.status||''}</td>
+          tr.innerHTML = `<td>${i.kategori||'LAINNYA'}</td><td>${i.merk||''}</td><td>${i.tipe||''}</td><td>${i.sn || '-'}</td><td>${i.lokasi||''}</td><td>${i.status||''}</td>
             <td style="display:${role==='admin'?'':'none'}">
               <button class="btn" style="padding:12px 30px;font-size:13px" onclick="alert('Edit belum aktif')">EDIT</button>
-              <button class="btn" style="background:#ff0000;padding:12px 30px;font-size:13px;margin-left:10px" onclick="if(confirm('DELETE?'))db.ref('inventaris/${c.key}').remove()">DELETE</button>
+              <button class="btn" style="background:#ff0000;padding:12px 30px;font-size:13px;margin-left:10px" onclick="if(confirm('DELETE?'))db.ref('inventaris/'+c.key).remove().then(()=>loadTable())">DELETE</button>
             </td>`;
           tbody.appendChild(tr);
         });
@@ -301,11 +290,16 @@
       if (!d.kategori || !d.merk || !d.tipe || !d.lokasi) return alert('LENGKAPI DATA!');
       db.ref('inventaris').push(d).then(() => {
         alert('BARANG BERHASIL DITAMBAHKAN!');
+        document.getElementById('merk').value = '';
+        document.getElementById('tipe').value = '';
+        document.getElementById('sn').value = '';
+        document.getElementById('lokasi').value = '';
+        document.getElementById('keterangan').value = '';
         showPage('assets');
       });
     }
 
-    // Jalankan saat halaman dibuka
+    // Load dropdown saat buka add
     loadKategoriDropdown();
   </script>
 </body>
