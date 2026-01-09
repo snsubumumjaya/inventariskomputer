@@ -135,6 +135,21 @@
     </div>
     <div id="kategori" class="content">
       <h2>KELOLA<br>KATEGORI</h2>
+
+      <div class="form-box" id="formTambahKategori" style="display:none;">
+        <h3 style="font-size:28px;margin-bottom:40px">TAMBAH KATEGORI BARU</h3>
+        <input type="text" id="namaKategoriBaru" placeholder="NAMA KATEGORI BARU">
+        <br><br>
+        <button class="btn" onclick="addKategori()">TAMBAH KATEGORI</button>
+        <button class="btn" style="background:#999;" onclick="document.getElementById('formTambahKategori').style.display='none'">BATAL</button>
+      </div>
+
+      <div style="margin-bottom:40px;">
+        <button class="btn" id="btnTambahKategori" style="display:none;" onclick="document.getElementById('formTambahKategori').style.display='block'; document.getElementById('namaKategoriBaru').focus();">
+          + TAMBAH KATEGORI BARU
+        </button>
+      </div>
+
       <div class="form-box">
         <h3 style="font-size:28px;margin-bottom:40px">DAFTAR KATEGORI SAAT INI</h3>
         <table style="width:100%">
@@ -142,14 +157,11 @@
             <tr>
               <th style="text-align:left;font-size:14px;letter-spacing:6px;opacity:0.7">NO</th>
               <th style="text-align:left;font-size:14px;letter-spacing:6px;opacity:0.7">NAMA KATEGORI</th>
+              <th id="aksiKategoriHeader" style="display:none">ACTION</th>
             </tr>
           </thead>
           <tbody id="kategoriTableBody"></tbody>
         </table>
-        <p style="margin-top:60px;opacity:0.6;font-size:16px">
-          Fitur tambah/edit/hapus kategori sementara dinonaktifkan.<br>
-          Gunakan Firebase Console untuk mengatur kategori.
-        </p>
       </div>
     </div>
   </div>
@@ -175,25 +187,14 @@
     const defaultKategori = ["Laptop","PC Desktop","Monitor","Printer","Aksesoris","Jaringan","Lainnya"];
     db.ref('kategori').once('value').then(snap => {
       if (!snap.exists() || Object.keys(snap.val() || {}).length === 0) {
-        defaultKategori.forEach(nama => {
-          db.ref('kategori').push({nama});
-        });
+        defaultKategori.forEach(nama => db.ref('kategori').push({nama}));
       }
     });
 
-    // PENGECEKAN AUTH + EMAIL VERIFICATION
+    // Auth + verification check
     auth.onAuthStateChanged(u => {
-      if (!u) {
-        location.href = "login.html";
-        return;
-      }
-      if (!u.emailVerified) {
-        auth.signOut().then(() => {
-          location.href = "login.html?msg=verify";
-        });
-        return;
-      }
-      // Kalau sudah verified, lanjut load role
+      if (!u) { location.href = "login.html"; return; }
+      if (!u.emailVerified) { auth.signOut().then(() => location.href = "login.html?msg=verify"); return; }
       db.ref('users/' + u.uid).once('value').then(s => {
         const d = s.val();
         role = d.role || 'staff';
@@ -202,8 +203,9 @@
           document.getElementById('menuAdd').style.display = 'block';
           document.getElementById('menuKategori').style.display = 'block';
           document.getElementById('aksiHeader').style.display = 'table-cell';
+          document.getElementById('btnTambahKategori').style.display = 'block';
+          document.getElementById('aksiKategoriHeader').style.display = 'table-cell';
         }
-        // Load default page
         showPage('home');
       });
     });
@@ -219,30 +221,10 @@
       if (id === 'add') loadKategoriDropdown();
     }
 
-    function loadKategoriTable() {
-      const tbody = document.getElementById('kategoriTableBody');
-      tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:100px;opacity:0.5">Loading kategori...</td></tr>';
-      db.ref('kategori').on('value', snap => {
-        const data = snap.val();
-        tbody.innerHTML = '';
-        if (!data || Object.keys(data).length === 0) {
-          tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:100px;opacity:0.5">BELUM ADA KATEGORI</td></tr>';
-          return;
-        }
-        let no = 1;
-        Object.keys(data).forEach(key => {
-          const nama = data[key].nama || 'Unknown';
-          const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${no++}</td><td>${nama}</td>`;
-          tbody.appendChild(tr);
-        });
-      });
-    }
-
     function loadKategoriDropdown() {
       const select = document.getElementById('kategori');
       select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
-      db.ref('kategori').once('value', snap => {  // ubah ke once biar lebih cepat
+      db.ref('kategori').once('value', snap => {
         const data = snap.val() || {};
         Object.keys(data).forEach(key => {
           const opt = document.createElement('option');
@@ -297,6 +279,62 @@
         document.getElementById('keterangan').value = '';
         showPage('assets');
       });
+    }
+
+    // === FITUR KELOLA KATEGORI ===
+    function loadKategoriTable() {
+      const tbody = document.getElementById('kategoriTableBody');
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:100px;opacity:0.5">Loading...</td></tr>';
+      db.ref('kategori').on('value', snap => {
+        const data = snap.val() || {};
+        tbody.innerHTML = '';
+        if (Object.keys(data).length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:100px;opacity:0.5">BELUM ADA KATEGORI</td></tr>';
+          return;
+        }
+        let no = 1;
+        Object.entries(data).forEach(([key, val]) => {
+          const nama = val.nama || 'Unknown';
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${no++}</td>
+            <td>${nama}</td>
+            <td style="display:${role==='admin'?'':'none'}">
+              <button class="btn" style="padding:12px 30px;font-size:13px" onclick="editKategori('${key}', '${nama}')">EDIT</button>
+              <button class="btn" style="background:#ff0000;padding:12px 30px;font-size:13px;margin-left:10px" onclick="deleteKategori('${key}')">DELETE</button>
+            </td>`;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    function addKategori() {
+      if (role !== 'admin') return alert('ADMIN ONLY');
+      const nama = document.getElementById('namaKategoriBaru').value.trim();
+      if (!nama) return alert('ISI NAMA KATEGORI!');
+      db.ref('kategori').push({nama}).then(() => {
+        alert('KATEGORI BERHASIL DITAMBAHKAN!');
+        document.getElementById('namaKategoriBaru').value = '';
+        document.getElementById('formTambahKategori').style.display = 'none';
+      }).catch(err => alert('Error: ' + err.message));
+    }
+
+    function editKategori(key, namaSaatIni) {
+      if (role !== 'admin') return;
+      const namaBaru = prompt('EDIT NAMA KATEGORI:', namaSaatIni);
+      if (namaBaru === null) return;
+      if (!namaBaru.trim()) return alert('NAMA TIDAK BOLEH KOSONG!');
+      db.ref('kategori/' + key).update({nama: namaBaru.trim()}).then(() => {
+        alert('KATEGORI BERHASIL DIUPDATE!');
+      }).catch(err => alert('Error: ' + err.message));
+    }
+
+    function deleteKategori(key) {
+      if (role !== 'admin') return;
+      if (!confirm('YAKIN HAPUS KATEGORI INI?\nBarang dengan kategori ini akan jadi "LAINNYA"')) return;
+      db.ref('kategori/' + key).remove().then(() => {
+        alert('KATEGORI BERHASIL DIHAPUS!');
+      }).catch(err => alert('Error: ' + err.message));
     }
 
     // Load dropdown saat buka add
