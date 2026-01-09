@@ -70,7 +70,7 @@
       flex:0 0 500px;display:none;flex-direction:column;
     }
     .right-kelola-kategori .form-box{
-      padding:60px 70px; /* sama dengan kiri, biar top border sejajar sempurna */
+      padding:60px 70px; /* top padding sama dengan kiri biar border atas sejajar */
       display:flex;flex-direction:column;height:100%;
     }
     .right-kelola-kategori h3{
@@ -87,6 +87,14 @@
     }
     .right-kelola-kategori td{
       font-size:17px;
+    }
+    /* ACTION COLUMN CENTER */
+    .right-kelola-kategori td:last-child {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      height: 100%;
     }
     /* BUTTON */
     .btn{
@@ -333,7 +341,7 @@
             <td>${nama}</td>
             <td>
               <button class="btn btn-small" onclick="editKategori('${key}', '${nama}')">EDIT</button>
-              <button class="btn btn-small" style="background:#ff0000;margin-left:8px" onclick="deleteKategori('${key}')">DELETE</button>
+              <button class="btn btn-small" style="background:#ff0000;" onclick="deleteKategori('${key}')">DELETE</button>
             </td>`;
           tbody.appendChild(tr);
         });
