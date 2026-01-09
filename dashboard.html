@@ -183,31 +183,46 @@
     const db = firebase.database();
     let role = 'staff';
 
-    // Default kategori
+    // Default kategori dengan error handling
     const defaultKategori = ["Laptop","PC Desktop","Monitor","Printer","Aksesoris","Jaringan","Lainnya"];
-    db.ref('kategori').once('value').then(snap => {
-      if (!snap.exists() || Object.keys(snap.val() || {}).length === 0) {
-        defaultKategori.forEach(nama => db.ref('kategori').push({nama}));
-      }
-    });
+    db.ref('kategori').once('value')
+      .then(snap => {
+        if (!snap.exists() || Object.keys(snap.val() || {}).length === 0) {
+          defaultKategori.forEach(nama => db.ref('kategori').push({nama}));
+        }
+      })
+      .catch(err => {
+        console.error("Error membuat default kategori:", err);
+        alert("Gagal membuat default kategori: " + err.message);
+      });
 
-    // Auth + verification check
+    // Auth + verification check dengan error handling
     auth.onAuthStateChanged(u => {
       if (!u) { location.href = "login.html"; return; }
       if (!u.emailVerified) { auth.signOut().then(() => location.href = "login.html?msg=verify"); return; }
-      db.ref('users/' + u.uid).once('value').then(s => {
-        const d = s.val();
-        role = d.role || 'staff';
-        document.getElementById('userInfo').innerText = d.nama + " – " + role.toUpperCase();
-        if (role === 'admin') {
-          document.getElementById('menuAdd').style.display = 'block';
-          document.getElementById('menuKategori').style.display = 'block';
-          document.getElementById('aksiHeader').style.display = 'table-cell';
-          document.getElementById('btnTambahKategori').style.display = 'block';
-          document.getElementById('aksiKategoriHeader').style.display = 'table-cell';
-        }
-        showPage('home');
-      });
+      db.ref('users/' + u.uid).once('value')
+        .then(s => {
+          const d = s.val();
+          if (!d) {
+            alert("Data user tidak ditemukan!");
+            auth.signOut();
+            return;
+          }
+          role = d.role || 'staff';
+          document.getElementById('userInfo').innerText = d.nama + " – " + role.toUpperCase();
+          if (role === 'admin') {
+            document.getElementById('menuAdd').style.display = 'block';
+            document.getElementById('menuKategori').style.display = 'block';
+            document.getElementById('aksiHeader').style.display = 'table-cell';
+            document.getElementById('btnTambahKategori').style.display = 'block';
+            document.getElementById('aksiKategoriHeader').style.display = 'table-cell';
+          }
+          showPage('home');
+        })
+        .catch(err => {
+          console.error("Error load user:", err);
+          alert("Error load data user: " + err.message);
+        });
     });
 
     function showPage(id) {
@@ -224,15 +239,20 @@
     function loadKategoriDropdown() {
       const select = document.getElementById('kategori');
       select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
-      db.ref('kategori').once('value', snap => {
-        const data = snap.val() || {};
-        Object.keys(data).forEach(key => {
-          const opt = document.createElement('option');
-          opt.value = data[key].nama;
-          opt.textContent = data[key].nama;
-          select.appendChild(opt);
+      db.ref('kategori').once('value')
+        .then(snap => {
+          const data = snap.val() || {};
+          Object.keys(data).forEach(key => {
+            const opt = document.createElement('option');
+            opt.value = data[key].nama;
+            opt.textContent = data[key].nama;
+            select.appendChild(opt);
+          });
+        })
+        .catch(err => {
+          console.error("Error load dropdown kategori:", err);
+          select.innerHTML += '<option style="color:#ff0000">ERROR LOAD KATEGORI</option>';
         });
-      });
     }
 
     function loadTable() {
@@ -254,6 +274,10 @@
             </td>`;
           tbody.appendChild(tr);
         });
+      }, err => {
+        tbody.innerHTML = `<tr><td colspan="7" style="color:#ff0000;padding:100px;text-align:center">
+          ERROR LOAD DATA INVENTARIS:<br>${err.message}
+        </td></tr>`;
       });
     }
 
@@ -270,26 +294,29 @@
         tanggal_input: new Date().toISOString().split('T')[0]
       };
       if (!d.kategori || !d.merk || !d.tipe || !d.lokasi) return alert('LENGKAPI DATA!');
-      db.ref('inventaris').push(d).then(() => {
-        alert('BARANG BERHASIL DITAMBAHKAN!');
-        document.getElementById('merk').value = '';
-        document.getElementById('tipe').value = '';
-        document.getElementById('sn').value = '';
-        document.getElementById('lokasi').value = '';
-        document.getElementById('keterangan').value = '';
-        showPage('assets');
-      });
+      db.ref('inventaris').push(d)
+        .then(() => {
+          alert('BARANG BERHASIL DITAMBAHKAN!');
+          document.getElementById('merk').value = '';
+          document.getElementById('tipe').value = '';
+          document.getElementById('sn').value = '';
+          document.getElementById('lokasi').value = '';
+          document.getElementById('keterangan').value = '';
+          showPage('assets');
+        })
+        .catch(err => alert('Error simpan data: ' + err.message));
     }
 
-    // === FITUR KELOLA KATEGORI ===
+    // Load tabel kategori dengan error handling lengkap
     function loadKategoriTable() {
       const tbody = document.getElementById('kategoriTableBody');
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:100px;opacity:0.5">Loading...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:100px;opacity:0.5">Loading kategori...</td></tr>';
+      
       db.ref('kategori').on('value', snap => {
         const data = snap.val() || {};
         tbody.innerHTML = '';
         if (Object.keys(data).length === 0) {
-          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:100px;opacity:0.5">BELUM ADA KATEGORI</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:100px;opacity:0.5">BELUM ADA KATEGORI<br>(Default akan dibuat otomatis oleh admin)</td></tr>';
           return;
         }
         let no = 1;
@@ -305,6 +332,12 @@
             </td>`;
           tbody.appendChild(tr);
         });
+      }, err => {
+        tbody.innerHTML = `<tr><td colspan="3" style="color:#ff0000;padding:100px;text-align:center;font-weight:900">
+          ERROR LOAD KATEGORI:<br>${err.message}<br><br>
+          Cek Firebase Rules atau browser console (F12) untuk detail error.
+        </td></tr>`;
+        console.error("Firebase error load kategori:", err);
       });
     }
 
@@ -312,11 +345,16 @@
       if (role !== 'admin') return alert('ADMIN ONLY');
       const nama = document.getElementById('namaKategoriBaru').value.trim();
       if (!nama) return alert('ISI NAMA KATEGORI!');
-      db.ref('kategori').push({nama}).then(() => {
-        alert('KATEGORI BERHASIL DITAMBAHKAN!');
-        document.getElementById('namaKategoriBaru').value = '';
-        document.getElementById('formTambahKategori').style.display = 'none';
-      }).catch(err => alert('Error: ' + err.message));
+      db.ref('kategori').push({nama})
+        .then(() => {
+          alert('KATEGORI BERHASIL DITAMBAHKAN!');
+          document.getElementById('namaKategoriBaru').value = '';
+          document.getElementById('formTambahKategori').style.display = 'none';
+        })
+        .catch(err => {
+          alert('Error tambah kategori: ' + err.message);
+          console.error(err);
+        });
     }
 
     function editKategori(key, namaSaatIni) {
@@ -324,17 +362,23 @@
       const namaBaru = prompt('EDIT NAMA KATEGORI:', namaSaatIni);
       if (namaBaru === null) return;
       if (!namaBaru.trim()) return alert('NAMA TIDAK BOLEH KOSONG!');
-      db.ref('kategori/' + key).update({nama: namaBaru.trim()}).then(() => {
-        alert('KATEGORI BERHASIL DIUPDATE!');
-      }).catch(err => alert('Error: ' + err.message));
+      db.ref('kategori/' + key).update({nama: namaBaru.trim()})
+        .then(() => alert('KATEGORI BERHASIL DIUPDATE!'))
+        .catch(err => {
+          alert('Error update kategori: ' + err.message);
+          console.error(err);
+        });
     }
 
     function deleteKategori(key) {
       if (role !== 'admin') return;
       if (!confirm('YAKIN HAPUS KATEGORI INI?\nBarang dengan kategori ini akan jadi "LAINNYA"')) return;
-      db.ref('kategori/' + key).remove().then(() => {
-        alert('KATEGORI BERHASIL DIHAPUS!');
-      }).catch(err => alert('Error: ' + err.message));
+      db.ref('kategori/' + key).remove()
+        .then(() => alert('KATEGORI BERHASIL DIHAPUS!'))
+        .catch(err => {
+          alert('Error hapus kategori: ' + err.message);
+          console.error(err);
+        });
     }
 
     // Load dropdown saat buka add
