@@ -55,7 +55,7 @@
     td{font-size:18px;font-weight:400;padding:20px 0;border-bottom:5px solid #000}
     /* FORM */
     .form-box{
-      background:#fafafa;padding:60px 80px;border:8px solid #000;margin:100px 0;
+      background:#fafafa;padding:60px 80px;border:8px solid #000;
     }
     .form-box input, .form-box select, .form-box textarea{
       width:100%;padding:20px 0;background:none;border:none;border-bottom:5px solid #000;
@@ -67,13 +67,14 @@
     }
     .left-tambah-barang{flex:1;min-width:600px;max-width:900px;}
     .right-kelola-kategori{
-      flex:0 0 500px;display:none;flex-direction:column;gap:30px;
+      flex:0 0 500px;display:none;flex-direction:column;
     }
     .right-kelola-kategori .form-box{
-      padding:50px 60px;margin:0;flex:1;display:flex;flex-direction:column;
+      padding:60px 70px; /* sama dengan kiri, biar top border sejajar sempurna */
+      display:flex;flex-direction:column;height:100%;
     }
     .right-kelola-kategori h3{
-      font-size:26px;margin-bottom:20px;letter-spacing:-2px;
+      font-size:26px;margin-bottom:30px;letter-spacing:-2px;
     }
     .right-kelola-kategori .tambah-kategori-controls{
       margin-bottom:20px;
@@ -177,7 +178,7 @@
           </div>
         </div>
 
-        <!-- KANAN: KELOLA KATEGORI (sejajar dari atas) -->
+        <!-- KANAN: KELOLA KATEGORI -->
         <div class="right-kelola-kategori" id="kelolaKategoriSection">
           <div class="form-box">
             <h3>KELOLA KATEGORI</h3>
@@ -273,7 +274,7 @@
           if (role === 'admin') {
             document.getElementById('menuAdd').style.display = 'block';
             document.getElementById('aksiHeader').style.display = 'table-cell';
-            document.getElementById('kelolaKategoriSection').style.display = 'flex';
+            document.getElementById('kelolaKategoriSection').style.display = 'block';
           }
           showPage('home');
           loadKategoriDropdown();
