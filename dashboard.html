@@ -32,6 +32,9 @@
       --ui-right: clamp(14px, 2.2vw, 20px);
 
       --uiScale: 0.90;
+
+      /* NEW: inverse zoom factor (zoom out => font tabel membesar, zoom in => mengecil) */
+      --zoomInv: 1;
     }
 
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -189,6 +192,9 @@
       justify-content:center;
       pointer-events:none;
       z-index:4500;
+      background:transparent;
+      border:none;
+      box-shadow:none;
     }
     .footer{
       background:transparent;
@@ -199,6 +205,7 @@
       font-weight:900;
       line-height:1;
       color:#000;
+
       opacity:0;
       transform:translateY(8px);
       transition:opacity .15s linear, transform .15s linear;
@@ -216,23 +223,26 @@
       margin-bottom:clamp(45px, 6vw, 80px);
     }
 
+    /* ===== TABLE (zoom-inverse responsive) ===== */
     table{
       width:100%;
       border-collapse:separate;
-      border-spacing:0 var(--row-gap);
+      border-spacing:0 calc(var(--row-gap) * var(--zoomInv));
     }
     th{
-      font-size:clamp(10px, 1vw, 12px);
-      letter-spacing:clamp(3px, 0.9vw, 6px);
+      font-size: calc(clamp(10px, 1vw, 12px) * var(--zoomInv));
+      letter-spacing: calc(clamp(3px, 0.9vw, 6px) * var(--zoomInv));
       text-transform:uppercase;
       opacity:0.7;
-      padding-bottom:20px;
+      padding-bottom: calc(20px * var(--zoomInv));
     }
     td{
-      font-size:clamp(16px, 1.6vw, 18px);
+      font-size: calc(clamp(16px, 1.6vw, 18px) * var(--zoomInv));
       font-weight:400;
-      padding:20px 0;
-      border-bottom:var(--b-mid) solid #000;
+      padding: calc(20px * var(--zoomInv)) 0;
+      border-bottom-style: solid;
+      border-bottom-color: #000;
+      border-bottom-width: calc(var(--b-mid) * var(--zoomInv));
     }
 
     .form-box{
@@ -284,6 +294,8 @@
       margin-bottom:clamp(18px, 2.6vw, 30px);
       letter-spacing:-2px;
     }
+    .right-kelola-kategori .tambah-kategori-controls{margin-bottom:20px;}
+    .right-kelola-kategori table{flex:1;}
     .right-kelola-kategori td:last-child{
       display:flex;
       justify-content:center;
@@ -488,10 +500,11 @@
   </div>
 
   <script>
-    /* ===== UI SCALE ===== */
+    /* ===== UI SCALE (bukan browser zoom) ===== */
     function applyUIScale(scale) {
       document.documentElement.style.setProperty("--uiScale", String(scale));
     }
+
     function calcAutoScale() {
       const physicalW = window.innerWidth * window.devicePixelRatio;
       const physicalH = window.innerHeight * window.devicePixelRatio;
@@ -501,8 +514,23 @@
       const s = Math.min(0.95, sW, sH);
       return Number(Math.max(0.85, s).toFixed(3));
     }
+
     applyUIScale(calcAutoScale());
     window.addEventListener("resize", () => applyUIScale(calcAutoScale()), { passive: true });
+
+    /* ===== NEW: inverse-zoom for table sizing ===== */
+    const __zoomBaseDpr = window.devicePixelRatio || 1;
+
+    function updateZoomInv() {
+      const dpr = window.devicePixelRatio || 1;
+      const inv = __zoomBaseDpr / dpr;
+      const clamped = Math.max(0.75, Math.min(1.35, inv));
+      document.documentElement.style.setProperty("--zoomInv", clamped.toFixed(3));
+    }
+
+    window.addEventListener("resize", updateZoomInv, { passive: true });
+    setInterval(updateZoomInv, 600);
+    updateZoomInv();
 
     /* ===== Firebase ===== */
     const firebaseConfig = {
@@ -514,6 +542,7 @@
       messagingSenderId: "915927761008",
       appId: "1:915927761008:web:a4b2e71159d00501fdf4b5"
     };
+
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
     const auth = firebase.auth();
@@ -531,19 +560,17 @@
 
     function $(id) { return document.getElementById(id); }
 
-    /* ===== Unique kategori (ANTI DUPLIKAT 100%) ===== */
+    /* ===== KATEGORI UNIQUE (anti duplikat 100%) ===== */
     function normalizeKategoriKey(s) {
-      return String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+      const norm = String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+      return norm.replace(/[.#$\[\]\/]/g, "_").slice(0, 80);
     }
 
-    /* FIX PENTING:
-       Jika key sudah ada, ABORT transaction (return undefined) supaya TIDAK melakukan write.
-       Ini mencegah crash dan tetap atomic untuk claim saat kosong. */
     async function claimKategoriKey(namaKey, kategoriId) {
       const ref = kategoriKeysRef.child(namaKey);
       const tx = await ref.transaction(current => {
-        if (current === null) return kategoriId;  // claim
-        return;                                  // abort (no write)
+        if (current === null) return kategoriId;
+        return; /* abort (no write) */
       });
       return { committed: tx.committed, owner: tx.snapshot.val() };
     }
@@ -571,9 +598,7 @@
         }
 
         const res = await claimKategoriKey(namaKey, id);
-        if (res.owner !== id) {
-          duplicates.push({ id, nama, namaKey, owner: res.owner });
-        }
+        if (res.owner !== id) duplicates.push({ id, nama, namaKey, owner: res.owner });
       }
 
       if (Object.keys(updates).length) await db.ref().update(updates);
@@ -630,6 +655,9 @@
       return b;
     }
 
+    /* ===== Menu routing ===== */
+    let menuWired = false;
+
     function setActiveMenu(pageId) {
       document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
       const el = document.querySelector('.menu-item[data-page="' + pageId + '"]');
@@ -659,6 +687,8 @@
     }
 
     function wireMenu() {
+      if (menuWired) return;
+      menuWired = true;
       document.querySelectorAll(".menu-item[data-page]").forEach(el => {
         el.addEventListener("click", () => showPage(el.dataset.page));
       });
@@ -995,7 +1025,7 @@
       showPage("assets");
     }
 
-    /* ===== autohide + footer show bottom ===== */
+    /* ===== autohide user info + footer show at bottom ===== */
     const scrollUI = {
       inited: false,
       ticking: false,
@@ -1065,7 +1095,7 @@
       requestAnimationFrame(scrollUIUpdate);
     }
 
-    /* ===== auth + role gate ===== */
+    /* ===== Auth + role gate ===== */
     auth.onAuthStateChanged(async (u) => {
       if (!u) { location.href = "login.html"; return; }
       if (!u.emailVerified) { await auth.signOut(); location.href = "login.html?msg=verify"; return; }
@@ -1093,7 +1123,6 @@
         $("kelolaKategoriSection").style.display = "none";
       }
 
-      /* PENTING: pasang menu lebih dulu supaya tidak “mati” walau admin-init error */
       wireMenu();
       await loadKategoriDropdown();
       initScrollUI();
@@ -1111,7 +1140,7 @@
       showPage("home");
     });
 
-    /* expose onclick */
+    /* expose for HTML onclick */
     window.closeEditModal = closeEditModal;
     window.saveEditData = saveEditData;
     window.saveData = saveData;
