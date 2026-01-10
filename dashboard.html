@@ -512,8 +512,8 @@
       const sW = physicalW / targetW;
       const sH = physicalH / targetH;
 
-      const s = Math.min(0.85, sW, sH);
-      return Number(Math.max(0.95, s).toFixed(3));
+      const s = Math.min(0.95, sW, sH);
+      return Number(Math.max(0.85, s).toFixed(3));
     }
 
     applyUIScale(calcAutoScale());
