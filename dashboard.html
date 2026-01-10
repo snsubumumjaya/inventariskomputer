@@ -20,7 +20,7 @@
       /* Typography */
       --h2-size: clamp(38px, 5.5vw, 64px);
 
-      /* Boxes / borders */
+      /* Borders */
       --b-strong: clamp(4px, 0.6vw, 8px);
       --b-mid: clamp(3px, 0.5vw, 6px);
 
@@ -36,6 +36,9 @@
       /* User info placement */
       --ui-top: clamp(14px, 2.2vw, 20px);
       --ui-right: clamp(14px, 2.2vw, 20px);
+
+      /* UI scale (bukan browser zoom) */
+      --uiScale: 0.67;
     }
 
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -70,6 +73,15 @@
       background-size:180px 180px;
       opacity:0.07;
       pointer-events:none;
+    }
+
+    /* ====== UI SCALE WRAPPER ====== */
+    #app{
+      position:relative;
+      transform: scale(var(--uiScale));
+      transform-origin: top left;
+      width: calc(100% / var(--uiScale));
+      height: calc(100% / var(--uiScale));
     }
 
     .sidebar{
@@ -120,7 +132,7 @@
     }
     .menu-item:hover::after,.menu-item.active::after{width:40px}
 
-    /* PANEL KANAN (relative agar overlay absolute bisa stabil) */
+    /* PANEL KANAN (relative agar overlay absolute stabil) */
     .main{
       position:fixed;
       left:var(--sidebar-w);
@@ -230,7 +242,7 @@
       letter-spacing:clamp(3px, 0.9vw, 6px);
       text-transform:uppercase;
       opacity:0.7;
-      padding-bottom:20px
+      padding-bottom:20px;
     }
     td{
       font-size:clamp(16px, 1.6vw, 18px);
@@ -265,8 +277,6 @@
       align-items:flex-start;
       justify-content:center;
     }
-
-    /* Lebih fleksibel saat zoom besar / layar kecil */
     .left-tambah-barang{
       flex:1 1 600px;
       min-width:min(600px, 100%);
@@ -350,155 +360,186 @@
 </head>
 
 <body>
-  <div class="sidebar">
-    <div class="logo"><h1>INVENTARIS<br>KOMPUTER</h1></div>
+  <div id="app">
+    <div class="sidebar">
+      <div class="logo"><h1>INVENTARIS<br>KOMPUTER</h1></div>
 
-    <div class="menu-item active" data-page="home">HOME</div>
-    <div class="menu-item" data-page="assets">SEMUA ASSET</div>
-    <div class="menu-item" id="menuAdd" style="display:none" data-page="add">+ TAMBAH BARANG</div>
-    <div class="menu-item" data-page="rusak">RUSAK / HILANG</div>
-  </div>
-
-  <div class="main">
-    <!-- USER INFO overlay -->
-    <div class="user-info" id="userInfoBox">
-      <span id="userInfo">LOADING...</span>
-      <button class="logout-btn" onclick="firebase.auth().signOut().then(()=>location.href='login.html')">LOGOUT</button>
+      <div class="menu-item active" data-page="home">HOME</div>
+      <div class="menu-item" data-page="assets">SEMUA ASSET</div>
+      <div class="menu-item" id="menuAdd" style="display:none" data-page="add">+ TAMBAH BARANG</div>
+      <div class="menu-item" data-page="rusak">RUSAK / HILANG</div>
     </div>
 
-    <!-- SCROLLER -->
-    <div id="scrollArea">
-      <div id="home" class="content active">
-        <h2>DASHBOARD<br>2026</h2>
+    <div class="main">
+      <!-- USER INFO overlay -->
+      <div class="user-info" id="userInfoBox">
+        <span id="userInfo">LOADING...</span>
+        <button class="logout-btn" onclick="firebase.auth().signOut().then(()=>location.href='login.html')">LOGOUT</button>
       </div>
 
-      <div id="assets" class="content">
-        <h2>SEMUA<br>ASSET</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>KATEGORI</th>
-              <th>MERK</th>
-              <th>TIPE</th>
-              <th>SN</th>
-              <th>LOKASI</th>
-              <th>STATUS</th>
-              <th id="aksiHeader" style="display:none">ACTION</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
+      <!-- SCROLLER -->
+      <div id="scrollArea">
+        <div id="home" class="content active">
+          <h2>DASHBOARD<br>2026</h2>
+        </div>
 
-      <div id="add" class="content">
-        <h2>TAMBAH<br>BARANG</h2>
+        <div id="assets" class="content">
+          <h2>SEMUA<br>ASSET</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>KATEGORI</th>
+                <th>MERK</th>
+                <th>TIPE</th>
+                <th>SN</th>
+                <th>LOKASI</th>
+                <th>STATUS</th>
+                <th id="aksiHeader" style="display:none">ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
 
-        <div class="add-layout">
-          <div class="left-tambah-barang">
-            <div class="form-box">
-              <select id="kategori"><option value="">— PILIH KATEGORI —</option></select>
-              <input type="text" id="merk" placeholder="MERK">
-              <input type="text" id="tipe" placeholder="TIPE / SPESIFIKASI">
-              <input type="text" id="sn" placeholder="SERIAL NUMBER (opsional)">
-              <input type="text" id="lokasi" placeholder="LOKASI / RUANGAN">
-              <select id="status">
-                <option value="OPERATIONAL">OPERATIONAL</option>
-                <option value="RUSAK">RUSAK</option>
-                <option value="PERBAIKAN">DALAM PERBAIKAN</option>
-                <option value="HILANG">HILANG</option>
-              </select>
-              <textarea id="keterangan" placeholder="KETERANGAN TAMBAHAN (opsional)"></textarea>
-              <br><br>
-              <button class="btn" onclick="saveData()">SIMPAN BARANG</button>
+        <div id="add" class="content">
+          <h2>TAMBAH<br>BARANG</h2>
+
+          <div class="add-layout">
+            <div class="left-tambah-barang">
+              <div class="form-box">
+                <select id="kategori"><option value="">— PILIH KATEGORI —</option></select>
+                <input type="text" id="merk" placeholder="MERK">
+                <input type="text" id="tipe" placeholder="TIPE / SPESIFIKASI">
+                <input type="text" id="sn" placeholder="SERIAL NUMBER (opsional)">
+                <input type="text" id="lokasi" placeholder="LOKASI / RUANGAN">
+                <select id="status">
+                  <option value="OPERATIONAL">OPERATIONAL</option>
+                  <option value="RUSAK">RUSAK</option>
+                  <option value="PERBAIKAN">DALAM PERBAIKAN</option>
+                  <option value="HILANG">HILANG</option>
+                </select>
+                <textarea id="keterangan" placeholder="KETERANGAN TAMBAHAN (opsional)"></textarea>
+                <br><br>
+                <button class="btn" onclick="saveData()">SIMPAN BARANG</button>
+              </div>
             </div>
-          </div>
 
-          <div class="right-kelola-kategori" id="kelolaKategoriSection">
-            <div class="form-box">
-              <h3>KELOLA KATEGORI</h3>
+            <div class="right-kelola-kategori" id="kelolaKategoriSection">
+              <div class="form-box">
+                <h3>KELOLA KATEGORI</h3>
 
-              <div class="tambah-kategori-controls">
-                <div id="formTambahKategori" style="display:none;margin-bottom:30px;">
-                  <input type="text" id="namaKategoriBaru" placeholder="NAMA KATEGORI BARU">
-                  <br><br>
-                  <button class="btn btn-small" onclick="addKategori()">TAMBAH</button>
-                  <button class="btn btn-small" style="background:#999;" onclick="document.getElementById('formTambahKategori').style.display='none'">BATAL</button>
+                <div class="tambah-kategori-controls">
+                  <div id="formTambahKategori" style="display:none;margin-bottom:30px;">
+                    <input type="text" id="namaKategoriBaru" placeholder="NAMA KATEGORI BARU">
+                    <br><br>
+                    <button class="btn btn-small" onclick="addKategori()">TAMBAH</button>
+                    <button class="btn btn-small" style="background:#999;" onclick="document.getElementById('formTambahKategori').style.display='none'">BATAL</button>
+                  </div>
+
+                  <button class="btn btn-small" onclick="document.getElementById('formTambahKategori').style.display='block'; document.getElementById('namaKategoriBaru').focus();">+ TAMBAH BARU</button>
                 </div>
 
-                <button class="btn btn-small" onclick="document.getElementById('formTambahKategori').style.display='block'; document.getElementById('namaKategoriBaru').focus();">+ TAMBAH BARU</button>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>NO</th>
+                      <th>KATEGORI</th>
+                      <th>ACTION</th>
+                    </tr>
+                  </thead>
+                  <tbody id="kategoriTableBody"></tbody>
+                </table>
               </div>
-
-              <table>
-                <thead>
-                  <tr>
-                    <th>NO</th>
-                    <th>KATEGORI</th>
-                    <th>ACTION</th>
-                  </tr>
-                </thead>
-                <tbody id="kategoriTableBody"></tbody>
-              </table>
             </div>
           </div>
         </div>
+
+        <div id="rusak" class="content">
+          <h2>RUSAK /<br>HILANG</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>KATEGORI</th>
+                <th>MERK</th>
+                <th>TIPE</th>
+                <th>SN</th>
+                <th>LOKASI</th>
+                <th>STATUS</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="rusakTableBody">
+              <tr>
+                <td colspan="7" style="text-align:center;padding:180px;opacity:0.3;font-size:28px;">
+                  BELUM ADA DATA RUSAK / HILANG<br>
+                  <span style="font-size:16px;opacity:0.6;">(Fitur ini sedang dikembangkan)</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div id="rusak" class="content">
-        <h2>RUSAK /<br>HILANG</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>KATEGORI</th>
-              <th>MERK</th>
-              <th>TIPE</th>
-              <th>SN</th>
-              <th>LOKASI</th>
-              <th>STATUS</th>
-              <th>ACTION</th>
-            </tr>
-          </thead>
-          <tbody id="rusakTableBody">
-            <tr>
-              <td colspan="7" style="text-align:center;padding:180px;opacity:0.3;font-size:28px;">
-                BELUM ADA DATA RUSAK / HILANG<br>
-                <span style="font-size:16px;opacity:0.6;">(Fitur ini sedang dikembangkan)</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- footer overlay -->
+      <div class="bottombar">
+        <div class="footer" id="footerBox">SN SUB UMUM – INTERNAL INVENTORY SYSTEM 2026</div>
       </div>
     </div>
 
-    <!-- footer overlay -->
-    <div class="bottombar">
-      <div class="footer" id="footerBox">SN SUB UMUM – INTERNAL INVENTORY SYSTEM 2026</div>
-    </div>
-  </div>
-
-  <div class="modal" id="editModal">
-    <div class="modal-box">
-      <span class="close-modal" onclick="closeEditModal()">×</span>
-      <h2>EDIT<br>BARANG</h2>
-      <div class="form-box">
-        <select id="editKategori"></select>
-        <input type="text" id="editMerk" placeholder="MERK">
-        <input type="text" id="editTipe" placeholder="TIPE / SPESIFIKASI">
-        <input type="text" id="editSn" placeholder="SERIAL NUMBER (opsional)">
-        <input type="text" id="editLokasi" placeholder="LOKASI / RUANGAN">
-        <select id="editStatus">
-          <option value="OPERATIONAL">OPERATIONAL</option>
-          <option value="RUSAK">RUSAK</option>
-          <option value="PERBAIKAN">DALAM PERBAIKAN</option>
-          <option value="HILANG">HILANG</option>
-        </select>
-        <textarea id="editKeterangan" placeholder="KETERANGAN TAMBAHAN (opsional)"></textarea>
-        <br><br>
-        <button class="btn" onclick="saveEditData()">SIMPAN PERUBAHAN</button>
+    <div class="modal" id="editModal">
+      <div class="modal-box">
+        <span class="close-modal" onclick="closeEditModal()">×</span>
+        <h2>EDIT<br>BARANG</h2>
+        <div class="form-box">
+          <select id="editKategori"></select>
+          <input type="text" id="editMerk" placeholder="MERK">
+          <input type="text" id="editTipe" placeholder="TIPE / SPESIFIKASI">
+          <input type="text" id="editSn" placeholder="SERIAL NUMBER (opsional)">
+          <input type="text" id="editLokasi" placeholder="LOKASI / RUANGAN">
+          <select id="editStatus">
+            <option value="OPERATIONAL">OPERATIONAL</option>
+            <option value="RUSAK">RUSAK</option>
+            <option value="PERBAIKAN">DALAM PERBAIKAN</option>
+            <option value="HILANG">HILANG</option>
+          </select>
+          <textarea id="editKeterangan" placeholder="KETERANGAN TAMBAHAN (opsional)"></textarea>
+          <br><br>
+          <button class="btn" onclick="saveEditData()">SIMPAN PERUBAHAN</button>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
+    /* ===== UI SCALE (bukan browser zoom) ===== */
+    function applyUIScale(scale) {
+      const app = document.getElementById("app");
+      if (!app) return;
+      document.documentElement.style.setProperty("--uiScale", String(scale));
+    }
+
+    function calcAutoScale() {
+      /* Stabil terhadap zoom browser: innerWidth turun, dpr naik => product relatif stabil */
+      const physicalW = window.innerWidth * window.devicePixelRatio;
+      const physicalH = window.innerHeight * window.devicePixelRatio;
+
+      const targetW = 1920;
+      const targetH = 1080;
+
+      const sW = physicalW / targetW;
+      const sH = physicalH / targetH;
+
+      /* Default 0.67, dan akan mengecil lagi jika layar lebih sempit */
+      const s = Math.min(0.67, sW, sH);
+
+      /* batas bawah biar tidak keterlaluan kecil */
+      return Number(Math.max(0.55, s).toFixed(3));
+    }
+
+    applyUIScale(calcAutoScale());
+    window.addEventListener("resize", () => applyUIScale(calcAutoScale()), { passive: true });
+
+    /* ===== Firebase + App logic ===== */
     const firebaseConfig = {
       apiKey: "AIzaSyCGyH-yVAgQU4iJ1tIz3cpWiWa65BdMsJ8",
       authDomain: "inventariskomputer.firebaseapp.com",
@@ -523,9 +564,7 @@
     let inventarisHandler = null;
     let kategoriTableHandler = null;
 
-    function $(id) {
-      return document.getElementById(id);
-    }
+    function $(id) { return document.getElementById(id); }
 
     function tdText(v) {
       const td = document.createElement("td");
