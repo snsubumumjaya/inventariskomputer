@@ -31,7 +31,7 @@
       --ui-top: clamp(14px, 2.2vw, 20px);
       --ui-right: clamp(14px, 2.2vw, 20px);
 
-      --uiScale: 0.67;
+      --uiScale: 0.90;
     }
 
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -68,7 +68,7 @@
       pointer-events:none;
     }
 
-    /* UI SCALE wrapper (bukan browser zoom) */
+    /* UI SCALE wrapper */
     #app{
       position:relative;
       transform: scale(var(--uiScale));
@@ -143,7 +143,6 @@
       padding:var(--pad-top) var(--pad-x) var(--pad-bot);
     }
 
-    /* User info overlay (auto-hide hanya di page add) */
     #userInfoBox{
       position:absolute;
       top:var(--ui-top);
@@ -190,9 +189,6 @@
       justify-content:center;
       pointer-events:none;
       z-index:4500;
-      background:transparent;
-      border:none;
-      box-shadow:none;
     }
     .footer{
       background:transparent;
@@ -288,10 +284,6 @@
       margin-bottom:clamp(18px, 2.6vw, 30px);
       letter-spacing:-2px;
     }
-    .right-kelola-kategori .tambah-kategori-controls{margin-bottom:20px;}
-    .right-kelola-kategori table{flex:1;}
-    .right-kelola-kategori th{font-size:clamp(9px, 0.95vw, 11px);letter-spacing:clamp(3px, 0.9vw, 5px);}
-    .right-kelola-kategori td{font-size:clamp(15px, 1.5vw, 17px);}
     .right-kelola-kategori td:last-child{
       display:flex;
       justify-content:center;
@@ -496,27 +488,19 @@
   </div>
 
   <script>
-    /* ===== UI SCALE (bukan browser zoom) ===== */
+    /* ===== UI SCALE ===== */
     function applyUIScale(scale) {
-      const app = document.getElementById("app");
-      if (!app) return;
       document.documentElement.style.setProperty("--uiScale", String(scale));
     }
-
     function calcAutoScale() {
       const physicalW = window.innerWidth * window.devicePixelRatio;
       const physicalH = window.innerHeight * window.devicePixelRatio;
-
-      const targetW = 1920;
-      const targetH = 1080;
-
+      const targetW = 1920, targetH = 1080;
       const sW = physicalW / targetW;
       const sH = physicalH / targetH;
-
-      const s = Math.min(0.67, sW, sH);
-      return Number(Math.max(0.55, s).toFixed(3));
+      const s = Math.min(0.95, sW, sH);
+      return Number(Math.max(0.85, s).toFixed(3));
     }
-
     applyUIScale(calcAutoScale());
     window.addEventListener("resize", () => applyUIScale(calcAutoScale()), { passive: true });
 
@@ -530,7 +514,6 @@
       messagingSenderId: "915927761008",
       appId: "1:915927761008:web:a4b2e71159d00501fdf4b5"
     };
-
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
     const auth = firebase.auth();
@@ -548,19 +531,21 @@
 
     function $(id) { return document.getElementById(id); }
 
-    /* ===== KATEGORI UNIQUE (anti duplikat 100%) ===== */
+    /* ===== Unique kategori (ANTI DUPLIKAT 100%) ===== */
     function normalizeKategoriKey(s) {
-      return String(s || "")
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, " ");
+      return String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
     }
 
+    /* FIX PENTING:
+       Jika key sudah ada, ABORT transaction (return undefined) supaya TIDAK melakukan write.
+       Ini mencegah crash dan tetap atomic untuk claim saat kosong. */
     async function claimKategoriKey(namaKey, kategoriId) {
       const ref = kategoriKeysRef.child(namaKey);
-      const tx = await ref.transaction(current => current === null ? kategoriId : current);
-      const owner = tx.snapshot.val();
-      return { committed: tx.committed, owner };
+      const tx = await ref.transaction(current => {
+        if (current === null) return kategoriId;  // claim
+        return;                                  // abort (no write)
+      });
+      return { committed: tx.committed, owner: tx.snapshot.val() };
     }
 
     let kategoriKeysSynced = false;
@@ -597,29 +582,24 @@
 
       if (duplicates.length) {
         console.warn("DUPLICATE KATEGORI DETECTED:", duplicates);
-        alert(
-          "PERINGATAN:\nTerdeteksi kategori duplikat dari data lama.\n" +
-          "Silakan rapikan (rename/hapus) pada menu KELOLA KATEGORI."
-        );
+        alert("PERINGATAN: ada kategori duplikat dari data lama. Rapikan (rename/hapus) di KELOLA KATEGORI.");
       }
     }
 
     async function ensureDefaultKategoriIfEmpty() {
       if (role !== "admin") return;
 
-      await syncKategoriKeysFromExistingKategori();
-
       const snap = await kategoriRef.once("value");
       if (snap.exists() && Object.keys(snap.val() || {}).length > 0) return;
 
-      const defaults = ["Laptop", "PC Desktop", "Monitor", "Printer", "Aksesoris", "Jaringan", "Lainnya"];
+      const defaults = ["Laptop","PC Desktop","Monitor","Printer","Aksesoris","Jaringan","Lainnya"];
 
       for (const nama of defaults) {
         const namaKey = normalizeKategoriKey(nama);
         const newId = kategoriRef.push().key;
 
         const claim = await claimKategoriKey(namaKey, newId);
-        if (claim.owner !== newId) continue;
+        if (!claim.committed || claim.owner !== newId) continue;
 
         try {
           await kategoriRef.child(newId).set({
@@ -635,7 +615,6 @@
       }
     }
 
-    /* ===== UI helpers ===== */
     function tdText(v) {
       const td = document.createElement("td");
       td.textContent = (v === undefined || v === null) ? "" : String(v);
@@ -651,7 +630,6 @@
       return b;
     }
 
-    /* ===== routing/menu ===== */
     function setActiveMenu(pageId) {
       document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
       const el = document.querySelector('.menu-item[data-page="' + pageId + '"]');
@@ -686,7 +664,6 @@
       });
     }
 
-    /* ===== kategori dropdown/table ===== */
     async function loadKategoriDropdown() {
       const select = $("kategori");
       const editSelect = $("editKategori");
@@ -728,8 +705,7 @@
         const data = snap.val() || {};
         const list = Object.entries(data).map(([id, v]) => ({
           id,
-          nama: (v && v.nama) ? v.nama : "Unknown",
-          namaKey: (v && v.namaKey) ? v.namaKey : normalizeKategoriKey((v && v.nama) ? v.nama : "")
+          nama: (v && v.nama) ? v.nama : "Unknown"
         })).sort((a,b) => a.nama.localeCompare(b.nama, "id", { sensitivity: "base" }));
 
         tbody.innerHTML = "";
@@ -772,7 +748,6 @@
       kategoriRef.on("value", kategoriTableHandler);
     }
 
-    /* ===== inventaris table ===== */
     function startInventarisListener() {
       const tbody = $("tableBody");
       if (!tbody) return;
@@ -841,7 +816,6 @@
       inventarisRef.on("value", inventarisHandler);
     }
 
-    /* ===== kategori CRUD (unique-safe) ===== */
     async function addKategori() {
       if (role !== "admin") return alert("ADMIN ONLY");
 
@@ -855,7 +829,7 @@
       const newId = kategoriRef.push().key;
 
       const claim = await claimKategoriKey(namaKey, newId);
-      if (claim.owner !== newId) {
+      if (!claim.committed || claim.owner !== newId) {
         alert("KATEGORI SUDAH ADA (DUPLIKAT)!");
         return;
       }
@@ -951,7 +925,6 @@
       loadKategoriDropdown();
     }
 
-    /* ===== inventaris add/edit ===== */
     async function openEditModal(key, data) {
       if (role !== "admin") return;
       currentEditKey = key;
@@ -1022,7 +995,7 @@
       showPage("assets");
     }
 
-    /* ===== autohide user info + footer show-at-bottom ===== */
+    /* ===== autohide + footer show bottom ===== */
     const scrollUI = {
       inited: false,
       ticking: false,
@@ -1079,7 +1052,6 @@
       if (footerBox) {
         const distToBottom = (scroller.scrollHeight - scroller.clientHeight) - scroller.scrollTop;
         const show = distToBottom <= 2;
-
         footerBox.style.opacity = show ? "1" : "0";
         footerBox.style.transform = show ? "translateY(0px)" : "translateY(8px)";
       }
@@ -1093,7 +1065,7 @@
       requestAnimationFrame(scrollUIUpdate);
     }
 
-    /* ===== Auth gate + role gate ===== */
+    /* ===== auth + role gate ===== */
     auth.onAuthStateChanged(async (u) => {
       if (!u) { location.href = "login.html"; return; }
       if (!u.emailVerified) { await auth.signOut(); location.href = "login.html?msg=verify"; return; }
@@ -1115,22 +1087,31 @@
         $("menuAdd").style.display = "block";
         $("aksiHeader").style.display = "table-cell";
         $("kelolaKategoriSection").style.display = "block";
-
-        await syncKategoriKeysFromExistingKategori();
-        await ensureDefaultKategoriIfEmpty();
       } else {
         $("menuAdd").style.display = "none";
         $("aksiHeader").style.display = "none";
         $("kelolaKategoriSection").style.display = "none";
       }
 
+      /* PENTING: pasang menu lebih dulu supaya tidak “mati” walau admin-init error */
       wireMenu();
       await loadKategoriDropdown();
       initScrollUI();
+
+      if (role === "admin") {
+        try {
+          await syncKategoriKeysFromExistingKategori();
+          await ensureDefaultKategoriIfEmpty();
+        } catch (e) {
+          console.error("ADMIN INIT ERROR:", e);
+          alert("ADMIN INIT ERROR: cek Console (F12).");
+        }
+      }
+
       showPage("home");
     });
 
-    /* expose for HTML onclick */
+    /* expose onclick */
     window.closeEditModal = closeEditModal;
     window.saveEditData = saveEditData;
     window.saveData = saveData;
