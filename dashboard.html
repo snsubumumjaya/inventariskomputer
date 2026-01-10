@@ -38,7 +38,7 @@
       --ui-right: clamp(14px, 2.2vw, 20px);
 
       /* UI scale (bukan browser zoom) */
-      --uiScale: 0.67;
+      --uiScale: 0.80;
     }
 
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -530,10 +530,10 @@
       const sH = physicalH / targetH;
 
       /* Default 0.67, dan akan mengecil lagi jika layar lebih sempit */
-      const s = Math.min(0.67, sW, sH);
+      const s = Math.min(0.90, sW, sH);
 
       /* batas bawah biar tidak keterlaluan kecil */
-      return Number(Math.max(0.55, s).toFixed(3));
+      return Number(Math.max(0.70, s).toFixed(3));
     }
 
     applyUIScale(calcAutoScale());
