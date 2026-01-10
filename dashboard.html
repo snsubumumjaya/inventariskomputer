@@ -11,22 +11,20 @@
 
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-
     html,body{
       height:100%;
       margin:0;
       background:#fff;
       color:#000;
       font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
-      overflow-x:hidden;
-      overflow-y:auto; /* scroll normal di body */
+      overflow:hidden; /* scroll hanya di .main */
     }
 
     body::before{
       content:"";
       position:fixed;
       inset:0;
-      z-index:-2;
+      z-index:-1;
       background:
         linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),
         linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px);
@@ -48,14 +46,12 @@
 
     .sidebar{
       position:fixed;
-      left:0;
-      top:0;
-      bottom:0;
+      left:0;top:0;bottom:0;
       width:300px;
       background:#000;
       color:#fff;
       padding:60px 50px;
-      z-index:900;
+      z-index:999;
       box-shadow:50px 0 80px rgba(0,0,0,0.4);
     }
     .logo{margin-bottom:120px}
@@ -96,12 +92,32 @@
     }
     .menu-item:hover::after,.menu-item.active::after{width:40px}
 
-    /* FIXED USER INFO: benar-benar nempel di viewport */
-    .user-info{
-      position:fixed !important;
-      top:20px;
-      right:20px;
+    /* MAIN: area yang scroll */
+    .main{
+      position:fixed;
+      left:300px;
+      top:0;
+      right:0;
+      bottom:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:0 100px 140px; /* padding top 0 supaya topbar sticky bisa nempel atas */
+      z-index:1;
+    }
+
+    /* TOPBAR sticky untuk user info (pojok kanan atas) */
+    .topbar{
+      position:sticky;
+      top:0;
       z-index:5000;
+      display:flex;
+      justify-content:flex-end;
+      padding:20px 0;
+      pointer-events:none; /* area topbar tidak ganggu klik konten */
+    }
+
+    .user-info{
+      pointer-events:auto; /* tombol logout tetap bisa diklik */
       background:#fff;
       padding:16px 28px;
       border:6px solid #000;
@@ -111,9 +127,13 @@
       display:flex;
       align-items:center;
       gap:24px;
-      transform:none !important;
-      filter:none !important;
+      max-width:calc(100vw - 360px);
+      opacity:1;
+      transform:translateY(0);
+      transition:opacity .08s linear, transform .08s linear;
+      will-change:opacity, transform;
     }
+
     .logout-btn{
       background:none;
       border:5px solid #000;
@@ -127,36 +147,12 @@
     }
     .logout-btn:hover{background:#000;color:#fff}
 
-    /* FIXED FOOTER: nempel bawah viewport, transparan (hanya teks) */
-    .footer{
-      position:fixed !important;
-      left:300px;
-      right:0;
-      bottom:15px;
-      z-index:4000;
-      text-align:center;
-      font-size:14px;
-      letter-spacing:8px;
-      font-weight:900;
-      color:#000;
-      background:transparent;
-      border:none;
-      padding:0;
-      pointer-events:none;
-      transform:none !important;
-      filter:none !important;
-    }
-
-    /* MAIN CONTENT (scroll mengikuti body) */
-    .main{
-      margin-left:300px;
-      padding:140px 100px 180px; /* bottom besar supaya konten tidak ketutup footer */
-      min-height:100vh;
+    .page-wrap{
+      padding:40px 0 0; /* jarak dari topbar */
     }
 
     .content{display:none}
     .content.active{display:block}
-
     h2{
       font-size:64px;
       font-weight:900;
@@ -170,7 +166,7 @@
     td{font-size:18px;font-weight:400;padding:20px 0;border-bottom:5px solid #000}
 
     .form-box{background:#fafafa;padding:60px 80px;border:8px solid #000;}
-    .form-box input,.form-box select,.form-box textarea{
+    .form-box input, .form-box select, .form-box textarea{
       width:100%;
       padding:20px 0;
       background:none;
@@ -190,42 +186,15 @@
     .right-kelola-kategori table{flex:1;}
     .right-kelola-kategori th{font-size:11px;letter-spacing:5px;}
     .right-kelola-kategori td{font-size:17px;}
-    .right-kelola-kategori td:last-child{display:flex;justify-content:center;align-items:center;gap:10px;height:100%;}
+    .right-kelola-kategori td:last-child {display:flex;justify-content:center;align-items:center;gap:10px;height:100%;}
 
-    .btn{
-      padding:16px 55px;
-      background:#000;
-      color:#fff;
-      font-size:15px;
-      font-weight:900;
-      letter-spacing:5px;
-      border:none;
-      cursor:pointer;
-      transition:.35s;
-      margin-right:15px;
-    }
+    .btn{padding:16px 55px;background:#000;color:#fff;font-size:15px;font-weight:900;letter-spacing:5px;border:none;cursor:pointer;transition:.35s;margin-right:15px;}
     .btn:hover{background:#ff0000}
     .btn-small{padding:10px 25px;font-size:13px;}
 
-    .modal{
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.8);
-      z-index:9999;
-      align-items:center;
-      justify-content:center;
-      overflow:auto;
-    }
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;overflow:auto;}
     .modal.active{display:flex}
-    .modal-box{
-      background:#fafafa;
-      padding:80px;
-      width:90%;
-      max-width:900px;
-      border:8px solid #000;
-      position:relative;
-    }
+    .modal-box{background:#fafafa;padding:80px;width:90%;max-width:900px;border:8px solid #000;position:relative;}
     .close-modal{position:absolute;top:30px;right:50px;font-size:40px;cursor:pointer;}
   </style>
 </head>
@@ -233,120 +202,121 @@
 <body>
   <div class="sidebar">
     <div class="logo"><h1>INVENTARIS<br>KOMPUTER</h1></div>
+
     <div class="menu-item active" data-page="home">HOME</div>
     <div class="menu-item" data-page="assets">SEMUA ASSET</div>
     <div class="menu-item" id="menuAdd" style="display:none" data-page="add">+ TAMBAH BARANG</div>
     <div class="menu-item" data-page="rusak">RUSAK / HILANG</div>
   </div>
 
-  <!-- HARUS di luar .main -->
-  <div class="user-info">
-    <span id="userInfo">LOADING...</span>
-    <button class="logout-btn" onclick="firebase.auth().signOut().then(()=>location.href='login.html')">LOGOUT</button>
-  </div>
-
-  <!-- HARUS di luar .main -->
-  <div class="footer">SN SUB UMUM – INTERNAL INVENTORY SYSTEM 2026</div>
-
-  <div class="main">
-    <div id="home" class="content active">
-      <h2>DASHBOARD<br>2026</h2>
-    </div>
-
-    <div id="assets" class="content">
-      <h2>SEMUA<br>ASSET</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>KATEGORI</th>
-            <th>MERK</th>
-            <th>TIPE</th>
-            <th>SN</th>
-            <th>LOKASI</th>
-            <th>STATUS</th>
-            <th id="aksiHeader" style="display:none">ACTION</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-
-    <div id="add" class="content">
-      <h2>TAMBAH<br>BARANG</h2>
-
-      <div class="add-layout">
-        <div class="left-tambah-barang">
-          <div class="form-box">
-            <select id="kategori"><option value="">— PILIH KATEGORI —</option></select>
-            <input type="text" id="merk" placeholder="MERK">
-            <input type="text" id="tipe" placeholder="TIPE / SPESIFIKASI">
-            <input type="text" id="sn" placeholder="SERIAL NUMBER (opsional)">
-            <input type="text" id="lokasi" placeholder="LOKASI / RUANGAN">
-            <select id="status">
-              <option value="OPERATIONAL">OPERATIONAL</option>
-              <option value="RUSAK">RUSAK</option>
-              <option value="PERBAIKAN">DALAM PERBAIKAN</option>
-              <option value="HILANG">HILANG</option>
-            </select>
-            <textarea id="keterangan" placeholder="KETERANGAN TAMBAHAN (opsional)"></textarea>
-            <br><br>
-            <button class="btn" onclick="saveData()">SIMPAN BARANG</button>
-          </div>
-        </div>
-
-        <div class="right-kelola-kategori" id="kelolaKategoriSection">
-          <div class="form-box">
-            <h3>KELOLA KATEGORI</h3>
-
-            <div class="tambah-kategori-controls">
-              <div id="formTambahKategori" style="display:none;margin-bottom:30px;">
-                <input type="text" id="namaKategoriBaru" placeholder="NAMA KATEGORI BARU">
-                <br><br>
-                <button class="btn btn-small" onclick="addKategori()">TAMBAH</button>
-                <button class="btn btn-small" style="background:#999;" onclick="document.getElementById('formTambahKategori').style.display='none'">BATAL</button>
-              </div>
-
-              <button class="btn btn-small" onclick="document.getElementById('formTambahKategori').style.display='block'; document.getElementById('namaKategoriBaru').focus();">+ TAMBAH BARU</button>
-            </div>
-
-            <table>
-              <thead>
-                <tr>
-                  <th>NO</th>
-                  <th>KATEGORI</th>
-                  <th>ACTION</th>
-                </tr>
-              </thead>
-              <tbody id="kategoriTableBody"></tbody>
-            </table>
-          </div>
-        </div>
+  <div class="main" id="scrollArea">
+    <div class="topbar">
+      <div class="user-info" id="userInfoBox">
+        <span id="userInfo">LOADING...</span>
+        <button class="logout-btn" onclick="firebase.auth().signOut().then(()=>location.href='login.html')">LOGOUT</button>
       </div>
     </div>
 
-    <div id="rusak" class="content">
-      <h2>RUSAK /<br>HILANG</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>KATEGORI</th>
-            <th>MERK</th>
-            <th>TIPE</th>
-            <th>SN</th>
-            <th>LOKASI</th>
-            <th>STATUS</th>
-            <th>ACTION</th>
-          </tr>
-        </thead>
-        <tbody id="rusakTableBody">
-          <tr>
-            <td colspan="7" style="text-align:center;padding:180px;opacity:0.3;font-size:28px;">
-              BELUM ADA DATA RUSAK / HILANG<br>
-              <span style="font-size:16px;opacity:0.6;">(Fitur ini sedang dikembangkan)</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-wrap">
+      <div id="home" class="content active">
+        <h2>DASHBOARD<br>2026</h2>
+      </div>
+
+      <div id="assets" class="content">
+        <h2>SEMUA<br>ASSET</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>KATEGORI</th>
+              <th>MERK</th>
+              <th>TIPE</th>
+              <th>SN</th>
+              <th>LOKASI</th>
+              <th>STATUS</th>
+              <th id="aksiHeader" style="display:none">ACTION</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="add" class="content">
+        <h2>TAMBAH<br>BARANG</h2>
+
+        <div class="add-layout">
+          <div class="left-tambah-barang">
+            <div class="form-box">
+              <select id="kategori"><option value="">— PILIH KATEGORI —</option></select>
+              <input type="text" id="merk" placeholder="MERK">
+              <input type="text" id="tipe" placeholder="TIPE / SPESIFIKASI">
+              <input type="text" id="sn" placeholder="SERIAL NUMBER (opsional)">
+              <input type="text" id="lokasi" placeholder="LOKASI / RUANGAN">
+              <select id="status">
+                <option value="OPERATIONAL">OPERATIONAL</option>
+                <option value="RUSAK">RUSAK</option>
+                <option value="PERBAIKAN">DALAM PERBAIKAN</option>
+                <option value="HILANG">HILANG</option>
+              </select>
+              <textarea id="keterangan" placeholder="KETERANGAN TAMBAHAN (opsional)"></textarea>
+              <br><br>
+              <button class="btn" onclick="saveData()">SIMPAN BARANG</button>
+            </div>
+          </div>
+
+          <div class="right-kelola-kategori" id="kelolaKategoriSection">
+            <div class="form-box">
+              <h3>KELOLA KATEGORI</h3>
+
+              <div class="tambah-kategori-controls">
+                <div id="formTambahKategori" style="display:none;margin-bottom:30px;">
+                  <input type="text" id="namaKategoriBaru" placeholder="NAMA KATEGORI BARU">
+                  <br><br>
+                  <button class="btn btn-small" onclick="addKategori()">TAMBAH</button>
+                  <button class="btn btn-small" style="background:#999;" onclick="document.getElementById('formTambahKategori').style.display='none'">BATAL</button>
+                </div>
+
+                <button class="btn btn-small" onclick="document.getElementById('formTambahKategori').style.display='block'; document.getElementById('namaKategoriBaru').focus();">+ TAMBAH BARU</button>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>NO</th>
+                    <th>KATEGORI</th>
+                    <th>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody id="kategoriTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="rusak" class="content">
+        <h2>RUSAK /<br>HILANG</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>KATEGORI</th>
+              <th>MERK</th>
+              <th>TIPE</th>
+              <th>SN</th>
+              <th>LOKASI</th>
+              <th>STATUS</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody id="rusakTableBody">
+            <tr>
+              <td colspan="7" style="text-align:center;padding:180px;opacity:0.3;font-size:28px;">
+                BELUM ADA DATA RUSAK / HILANG<br>
+                <span style="font-size:16px;opacity:0.6;">(Fitur ini sedang dikembangkan)</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -435,6 +405,8 @@
         loadKategoriDropdown();
         if (role === "admin") startKategoriTableListener();
       }
+
+      setUserInfoAutoHide(pageId === "add");
     }
 
     function wireMenu() {
@@ -444,7 +416,7 @@
     }
 
     async function ensureDefaultKategoriIfEmpty() {
-      const defaultKategori = ["Laptop","PC Desktop","Monitor","Printer","Aksesoris","Jaringan","Lainnya"];
+      const defaultKategori = ["Laptop", "PC Desktop", "Monitor", "Printer", "Aksesoris", "Jaringan", "Lainnya"];
       const snap = await kategoriRef.once("value");
       const empty = !snap.exists() || Object.keys(snap.val() || {}).length === 0;
       if (!empty) return;
@@ -461,8 +433,8 @@
       const select = $("kategori");
       const editSelect = $("editKategori");
 
-      select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
-      editSelect.innerHTML = "";
+      if (select) select.innerHTML = '<option value="">— PILIH KATEGORI —</option>';
+      if (editSelect) editSelect.innerHTML = "";
 
       const snap = await kategoriRef.once("value");
       const data = snap.val() || {};
@@ -470,21 +442,25 @@
       Object.keys(data).forEach(key => {
         const nama = (data[key] && data[key].nama) ? data[key].nama : "Unknown";
 
-        const opt1 = document.createElement("option");
-        opt1.value = nama;
-        opt1.textContent = nama;
+        if (select) {
+          const opt1 = document.createElement("option");
+          opt1.value = nama;
+          opt1.textContent = nama;
+          select.appendChild(opt1);
+        }
 
-        const opt2 = document.createElement("option");
-        opt2.value = nama;
-        opt2.textContent = nama;
-
-        select.appendChild(opt1);
-        editSelect.appendChild(opt2);
+        if (editSelect) {
+          const opt2 = document.createElement("option");
+          opt2.value = nama;
+          opt2.textContent = nama;
+          editSelect.appendChild(opt2);
+        }
       });
     }
 
     function startKategoriTableListener() {
       const tbody = $("kategoriTableBody");
+      if (!tbody) return;
 
       if (kategoriTableHandler) kategoriRef.off("value", kategoriTableHandler);
 
@@ -533,6 +509,7 @@
 
     function startInventarisListener() {
       const tbody = $("tableBody");
+      if (!tbody) return;
 
       if (inventarisHandler) inventarisRef.off("value", inventarisHandler);
 
@@ -584,6 +561,7 @@
 
             actionTd.appendChild(editB);
             actionTd.appendChild(delB);
+
             tr.appendChild(actionTd);
           }
 
@@ -630,10 +608,7 @@
         keterangan: $("editKeterangan").value.trim() || "-"
       };
 
-      if (!d.merk || !d.tipe || !d.lokasi) {
-        alert("LENGKAPI DATA!");
-        return;
-      }
+      if (!d.merk || !d.tipe || !d.lokasi) return alert("LENGKAPI DATA!");
 
       await inventarisRef.child(currentEditKey).update(d);
       alert("BARANG BERHASIL DIUPDATE!");
@@ -641,10 +616,7 @@
     }
 
     async function saveData() {
-      if (role !== "admin") {
-        alert("ADMIN ONLY");
-        return;
-      }
+      if (role !== "admin") return alert("ADMIN ONLY");
 
       const d = {
         kategori: $("kategori").value || "LAINNYA",
@@ -657,10 +629,7 @@
         tanggal_input: new Date().toISOString().split("T")[0]
       };
 
-      if (!d.kategori || !d.merk || !d.tipe || !d.lokasi) {
-        alert("LENGKAPI DATA!");
-        return;
-      }
+      if (!d.kategori || !d.merk || !d.tipe || !d.lokasi) return alert("LENGKAPI DATA!");
 
       await inventarisRef.push(d);
 
@@ -690,10 +659,8 @@
 
     async function editKategori(key, namaSaatIni) {
       if (role !== "admin") return;
-
       const namaBaru = prompt("EDIT NAMA KATEGORI:", namaSaatIni);
       if (namaBaru === null || !namaBaru.trim()) return;
-
       await kategoriRef.child(key).update({ nama: namaBaru.trim() });
       alert("KATEGORI DIUPDATE!");
       loadKategoriDropdown();
@@ -701,13 +668,81 @@
 
     async function deleteKategori(key) {
       if (role !== "admin") return;
-
       const ok = confirm("YAKIN HAPUS KATEGORI INI?");
       if (!ok) return;
-
       await kategoriRef.child(key).remove();
       alert("KATEGORI DIHAPUS!");
       loadKategoriDropdown();
+    }
+
+    let uiAutoHideInited = false;
+    let uiAutoHideEnabled = false;
+
+    function initUserInfoAutoHide() {
+      if (uiAutoHideInited) return;
+      uiAutoHideInited = true;
+
+      const main = document.getElementById("scrollArea");
+      const box = document.getElementById("userInfoBox");
+      if (!main || !box) return;
+
+      const HIDE_AT = 180;
+
+      let ticking = false;
+
+      function applyState() {
+        if (!uiAutoHideEnabled) {
+          box.style.opacity = "1";
+          box.style.transform = "translateY(0px)";
+          box.style.pointerEvents = "auto";
+          ticking = false;
+          return;
+        }
+
+        const t = Math.max(0, Math.min(HIDE_AT, main.scrollTop));
+        const p = 1 - (t / HIDE_AT);
+        const shift = t * 0.9;
+
+        box.style.opacity = String(p);
+        box.style.transform = "translateY(" + (-shift) + "px)";
+        box.style.pointerEvents = (p < 0.05) ? "none" : "auto";
+
+        ticking = false;
+      }
+
+      function onScroll() {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(applyState);
+        }
+      }
+
+      main.addEventListener("scroll", onScroll, { passive: true });
+      applyState();
+    }
+
+    function setUserInfoAutoHide(enabled) {
+      uiAutoHideEnabled = !!enabled;
+      initUserInfoAutoHide();
+      const main = document.getElementById("scrollArea");
+      if (main) {
+        requestAnimationFrame(() => {
+          const box = document.getElementById("userInfoBox");
+          if (!box) return;
+          if (!uiAutoHideEnabled) {
+            box.style.opacity = "1";
+            box.style.transform = "translateY(0px)";
+            box.style.pointerEvents = "auto";
+          } else {
+            const t = Math.max(0, Math.min(180, main.scrollTop));
+            const p = 1 - (t / 180);
+            const shift = t * 0.9;
+            box.style.opacity = String(p);
+            box.style.transform = "translateY(" + (-shift) + "px)";
+            box.style.pointerEvents = (p < 0.05) ? "none" : "auto";
+          }
+        });
+      }
     }
 
     auth.onAuthStateChanged(async (u) => {
@@ -751,8 +786,6 @@
     window.saveEditData = saveEditData;
     window.saveData = saveData;
     window.addKategori = addKategori;
-    window.editKategori = editKategori;
-    window.deleteKategori = deleteKategori;
   </script>
 </body>
 </html>
