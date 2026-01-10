@@ -17,15 +17,17 @@
       background:#fff;
       color:#000;
       font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
-      overflow:hidden; /* halaman tidak scroll, yang scroll hanya .main */
+      overflow:hidden; /* yang scroll hanya .main */
     }
 
     body::before{
       content:"";
       position:fixed;
       inset:0;
-      z-index:-1;
-      background:linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px);
+      z-index:-2;
+      background:
+        linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px);
       background-size:45px 45px;
       pointer-events:none;
     }
@@ -34,7 +36,9 @@
       position:fixed;
       inset:0;
       z-index:-1;
-      background:linear-gradient(#000 2px,transparent 2px),linear-gradient(90deg,#000 2px,transparent 2px);
+      background:
+        linear-gradient(#000 2px,transparent 2px),
+        linear-gradient(90deg,#000 2px,transparent 2px);
       background-size:180px 180px;
       opacity:0.07;
       pointer-events:none;
@@ -42,14 +46,12 @@
 
     .sidebar{
       position:fixed;
-      left:0;
-      top:0;
-      bottom:0;
+      left:0; top:0; bottom:0;
       width:300px;
       background:#000;
       color:#fff;
       padding:60px 50px;
-      z-index:999;
+      z-index:900;
       box-shadow:50px 0 80px rgba(0,0,0,0.4);
     }
     .logo{margin-bottom:120px}
@@ -81,65 +83,71 @@
     .menu-item::after{
       content:"";
       position:absolute;
-      left:0;
-      bottom:0;
-      width:0;
-      height:3px;
+      left:0; bottom:0;
+      width:0; height:3px;
       background:#fff;
       transition:all .35s;
     }
     .menu-item:hover::after,.menu-item.active::after{width:40px}
 
+    /* FIX: benar-benar menempel di pojok kanan atas viewport */
     .user-info{
       position:fixed;
-      right:70px;
-      top:60px;
-      z-index:1100;
+      top:20px;
+      right:20px;
+      z-index:2000;
       background:#fff;
-      padding:16px 35px;
+      padding:16px 28px;
       border:6px solid #000;
       font-size:13px;
       letter-spacing:6px;
       font-weight:900;
       display:flex;
       align-items:center;
-      gap:40px;
+      gap:24px;
+      max-width:calc(100vw - 40px);
     }
     .logout-btn{
       background:none;
       border:5px solid #000;
-      padding:12px 35px;
+      padding:12px 28px;
       font-size:13px;
       font-weight:900;
       letter-spacing:5px;
       cursor:pointer;
       transition:.35s;
+      white-space:nowrap;
     }
     .logout-btn:hover{background:#000;color:#fff}
 
+    /* FIX: footer menempel bawah viewport, transparan (tanpa box) */
     .footer{
       position:fixed;
-      bottom:30px;
-      left:300px;
+      left:300px;   /* biar tidak nabrak sidebar */
       right:0;
+      bottom:15px;
+      z-index:1500;
       text-align:center;
       font-size:14px;
       letter-spacing:8px;
       font-weight:900;
       color:#000;
-      z-index:1050;
-      background:#fff;
-      padding:20px 0;
+      background:transparent; /* transparan */
+      border:none;            /* no box */
+      padding:0;              /* no box */
+      pointer-events:none;    /* biar tidak ganggu klik konten */
     }
 
+    /* Konten utama yang scroll */
     .main{
       position:fixed;
       left:300px;
       top:0;
       right:0;
       bottom:0;
-      overflow-y:auto;           /* yang scroll hanya area ini */
-      padding:140px 100px 170px; /* top agar tidak ketutup user-info, bottom agar tidak ketutup footer */
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:120px 100px 110px; /* top: hindari ketutup user-info, bottom: hindari ketutup footer */
     }
 
     .content{display:none}
