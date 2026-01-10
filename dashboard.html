@@ -10,6 +10,34 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 
   <style>
+    :root{
+      /* Layout core */
+      --sidebar-w: clamp(220px, 22vw, 300px);
+      --pad-x: clamp(20px, 5.5vw, 100px);
+      --pad-top: clamp(110px, 10vh, 140px);
+      --pad-bot: clamp(90px, 10vh, 120px);
+
+      /* Typography */
+      --h2-size: clamp(38px, 5.5vw, 64px);
+
+      /* Boxes / borders */
+      --b-strong: clamp(4px, 0.6vw, 8px);
+      --b-mid: clamp(3px, 0.5vw, 6px);
+
+      /* Spacing */
+      --gap: clamp(32px, 6vw, 100px);
+      --row-gap: clamp(14px, 2.2vw, 25px);
+
+      /* Form */
+      --form-pad-y: clamp(40px, 5vw, 60px);
+      --form-pad-x: clamp(36px, 5vw, 80px);
+      --input-font: clamp(18px, 2.2vw, 22px);
+
+      /* User info placement */
+      --ui-top: clamp(14px, 2.2vw, 20px);
+      --ui-right: clamp(14px, 2.2vw, 20px);
+    }
+
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
     html,body{
       height:100%;
@@ -17,7 +45,7 @@
       background:#fff;
       color:#000;
       font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
-      overflow:hidden; /* body tidak scroll */
+      overflow:hidden;
     }
 
     body::before{
@@ -47,32 +75,32 @@
     .sidebar{
       position:fixed;
       left:0;top:0;bottom:0;
-      width:300px;
+      width:var(--sidebar-w);
       background:#000;
       color:#fff;
-      padding:60px 50px;
+      padding:clamp(35px, 5vw, 60px) clamp(20px, 4vw, 50px);
       z-index:999;
       box-shadow:50px 0 80px rgba(0,0,0,0.4);
     }
-    .logo{margin-bottom:120px}
+    .logo{margin-bottom:clamp(70px, 10vh, 120px)}
     .logo h1{
-      font-size:38px;
+      font-size:clamp(28px, 3.5vw, 38px);
       font-weight:900;
       letter-spacing:-3px;
       line-height:0.95;
       background:#fff;
       color:#000;
-      padding:25px 35px;
+      padding:clamp(16px, 2.5vw, 25px) clamp(18px, 3vw, 35px);
       display:inline-block;
-      border:6px solid #000;
+      border:var(--b-mid) solid #000;
       box-shadow:12px 12px 0 #000;
     }
 
     .menu-item{
-      font-size:17px;
+      font-size:clamp(14px, 1.7vw, 17px);
       font-weight:900;
       letter-spacing:-0.3px;
-      margin:30px 0;
+      margin:clamp(18px, 2.6vw, 30px) 0;
       cursor:pointer;
       transition:all .35s;
       opacity:0.8;
@@ -92,10 +120,10 @@
     }
     .menu-item:hover::after,.menu-item.active::after{width:40px}
 
-    /* PANEL KANAN (RELATIVE supaya overlay user/footer bisa absolute) */
+    /* PANEL KANAN (relative agar overlay absolute bisa stabil) */
     .main{
       position:fixed;
-      left:300px;
+      left:var(--sidebar-w);
       top:0;
       right:0;
       bottom:0;
@@ -103,35 +131,33 @@
       z-index:1;
     }
 
-    /* SCROLL AREA full tinggi (ini yang scroll) */
+    /* SCROLL AREA full tinggi */
     #scrollArea{
       position:absolute;
       inset:0;
       overflow-y:auto;
       overflow-x:hidden;
-
-      /* padding besar supaya konten tidak "nabrak" overlay user-info / footer */
-      padding:140px 100px 120px;
+      padding:var(--pad-top) var(--pad-x) var(--pad-bot);
     }
 
     /* USER INFO overlay (tanpa topbar) */
     #userInfoBox{
       position:absolute;
-      top:20px;
-      right:20px;
+      top:var(--ui-top);
+      right:var(--ui-right);
       z-index:5000;
       pointer-events:auto;
 
       background:rgba(255,255,255,0.92);
-      padding:16px 28px;
-      border:6px solid #000;
-      font-size:13px;
-      letter-spacing:6px;
+      padding:clamp(12px, 1.6vw, 16px) clamp(18px, 2.4vw, 28px);
+      border:var(--b-mid) solid #000;
+      font-size:clamp(11px, 1.1vw, 13px);
+      letter-spacing:clamp(3px, 0.8vw, 6px);
       font-weight:900;
       display:flex;
       align-items:center;
-      gap:24px;
-      max-width:calc(100vw - 360px);
+      gap:clamp(14px, 2vw, 24px);
+      max-width:calc(100vw - var(--sidebar-w) - (var(--pad-x) * 2));
 
       opacity:1;
       transform:translateY(0);
@@ -141,23 +167,23 @@
 
     .logout-btn{
       background:none;
-      border:5px solid #000;
-      padding:12px 28px;
-      font-size:13px;
+      border:var(--b-mid) solid #000;
+      padding:clamp(10px, 1.4vw, 12px) clamp(18px, 2.2vw, 28px);
+      font-size:clamp(11px, 1.1vw, 13px);
       font-weight:900;
-      letter-spacing:5px;
+      letter-spacing:clamp(3px, 0.8vw, 5px);
       cursor:pointer;
       transition:.35s;
       white-space:nowrap;
     }
     .logout-btn:hover{background:#000;color:#fff}
 
-    /* BOTTOM BAR overlay (tetap di bawah, transparan) */
+    /* BOTTOM BAR overlay (tetap bawah, transparan) */
     .bottombar{
       position:absolute;
       left:0;
       right:0;
-      bottom:6px; /* lebih rendah */
+      bottom:clamp(0px, 0.8vw, 6px);
       display:flex;
       justify-content:center;
       pointer-events:none;
@@ -171,8 +197,8 @@
       background:transparent;
       border:none;
       padding:0;
-      font-size:14px;
-      letter-spacing:8px;
+      font-size:clamp(11px, 1.2vw, 14px);
+      letter-spacing:clamp(4px, 1.0vw, 8px);
       font-weight:900;
       line-height:1;
       color:#000;
@@ -185,49 +211,141 @@
 
     .content{display:none}
     .content.active{display:block}
+
     h2{
-      font-size:64px;
+      font-size:var(--h2-size);
       font-weight:900;
       letter-spacing:-6px;
       line-height:0.95;
-      margin-bottom:80px
+      margin-bottom:clamp(45px, 6vw, 80px);
     }
 
-    table{width:100%;border-collapse:separate;border-spacing:0 25px}
-    th{font-size:12px;letter-spacing:6px;text-transform:uppercase;opacity:0.7;padding-bottom:20px}
-    td{font-size:18px;font-weight:400;padding:20px 0;border-bottom:5px solid #000}
-
-    .form-box{background:#fafafa;padding:60px 80px;border:8px solid #000;}
-    .form-box input, .form-box select, .form-box textarea{
+    table{
       width:100%;
+      border-collapse:separate;
+      border-spacing:0 var(--row-gap);
+    }
+    th{
+      font-size:clamp(10px, 1vw, 12px);
+      letter-spacing:clamp(3px, 0.9vw, 6px);
+      text-transform:uppercase;
+      opacity:0.7;
+      padding-bottom:20px
+    }
+    td{
+      font-size:clamp(16px, 1.6vw, 18px);
+      font-weight:400;
       padding:20px 0;
+      border-bottom:var(--b-mid) solid #000;
+    }
+
+    .form-box{
+      background:#fafafa;
+      padding:var(--form-pad-y) var(--form-pad-x);
+      border:var(--b-strong) solid #000;
+    }
+
+    .form-box input,
+    .form-box select,
+    .form-box textarea{
+      width:100%;
+      padding:clamp(16px, 2vw, 20px) 0;
       background:none;
       border:none;
-      border-bottom:5px solid #000;
-      font-size:22px;
-      margin:40px 0;
+      border-bottom:var(--b-mid) solid #000;
+      font-size:var(--input-font);
+      margin:clamp(22px, 4vw, 40px) 0;
       outline:none;
     }
 
-    .add-layout{display:flex;gap:100px;flex-wrap:wrap;align-items:flex-start;justify-content:center;}
-    .left-tambah-barang{flex:1;min-width:600px;max-width:900px;}
-    .right-kelola-kategori{flex:0 0 500px;display:none;flex-direction:column;}
-    .right-kelola-kategori .form-box{padding:60px 70px;display:flex;flex-direction:column;height:100%;}
-    .right-kelola-kategori h3{font-size:26px;margin-bottom:30px;letter-spacing:-2px;}
+    .add-layout{
+      display:flex;
+      gap:var(--gap);
+      flex-wrap:wrap;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    /* Lebih fleksibel saat zoom besar / layar kecil */
+    .left-tambah-barang{
+      flex:1 1 600px;
+      min-width:min(600px, 100%);
+      max-width:900px;
+    }
+    .right-kelola-kategori{
+      flex:1 1 500px;
+      display:none;
+      flex-direction:column;
+      min-width:min(500px, 100%);
+    }
+
+    .right-kelola-kategori .form-box{
+      padding:var(--form-pad-y) clamp(28px, 4vw, 70px);
+      display:flex;
+      flex-direction:column;
+      height:100%;
+    }
+    .right-kelola-kategori h3{
+      font-size:clamp(20px, 2.2vw, 26px);
+      margin-bottom:clamp(18px, 2.6vw, 30px);
+      letter-spacing:-2px;
+    }
     .right-kelola-kategori .tambah-kategori-controls{margin-bottom:20px;}
     .right-kelola-kategori table{flex:1;}
-    .right-kelola-kategori th{font-size:11px;letter-spacing:5px;}
-    .right-kelola-kategori td{font-size:17px;}
-    .right-kelola-kategori td:last-child {display:flex;justify-content:center;align-items:center;gap:10px;height:100%;}
+    .right-kelola-kategori th{font-size:clamp(9px, 0.95vw, 11px);letter-spacing:clamp(3px, 0.9vw, 5px);}
+    .right-kelola-kategori td{font-size:clamp(15px, 1.5vw, 17px);}
+    .right-kelola-kategori td:last-child{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      height:100%;
+    }
 
-    .btn{padding:16px 55px;background:#000;color:#fff;font-size:15px;font-weight:900;letter-spacing:5px;border:none;cursor:pointer;transition:.35s;margin-right:15px;}
+    .btn{
+      padding:clamp(12px, 1.8vw, 16px) clamp(26px, 5vw, 55px);
+      background:#000;
+      color:#fff;
+      font-size:clamp(12px, 1.2vw, 15px);
+      font-weight:900;
+      letter-spacing:clamp(3px, 0.9vw, 5px);
+      border:none;
+      cursor:pointer;
+      transition:.35s;
+      margin-right:15px;
+    }
     .btn:hover{background:#ff0000}
-    .btn-small{padding:10px 25px;font-size:13px;}
+    .btn-small{
+      padding:clamp(9px, 1.2vw, 10px) clamp(14px, 2.6vw, 25px);
+      font-size:clamp(11px, 1.1vw, 13px);
+    }
 
-    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;overflow:auto;}
+    .modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.8);
+      z-index:9999;
+      align-items:center;
+      justify-content:center;
+      overflow:auto;
+    }
     .modal.active{display:flex}
-    .modal-box{background:#fafafa;padding:80px;width:90%;max-width:900px;border:8px solid #000;position:relative;}
-    .close-modal{position:absolute;top:30px;right:50px;font-size:40px;cursor:pointer;}
+    .modal-box{
+      background:#fafafa;
+      padding:clamp(40px, 6vw, 80px);
+      width:90%;
+      max-width:900px;
+      border:var(--b-strong) solid #000;
+      position:relative;
+    }
+    .close-modal{
+      position:absolute;
+      top:clamp(18px, 3vw, 30px);
+      right:clamp(22px, 4vw, 50px);
+      font-size:clamp(28px, 4vw, 40px);
+      cursor:pointer;
+    }
   </style>
 </head>
 
@@ -760,7 +878,7 @@
 
       if (userBox) {
         if (scrollUI.userHide) {
-          const HIDE_AT = 210; // sesuai setting kamu
+          const HIDE_AT = 210;
           const t = Math.max(0, Math.min(HIDE_AT, scroller.scrollTop));
           const p = 1 - (t / HIDE_AT);
           const shift = t * 0.9;
