@@ -11,26 +11,37 @@
 
   <style>
     :root{
-      /* =========================
-         MANUAL FONT SIZE SETTINGS
-         ========================= */
-      /* HEADER tabel "SEMUA ASSET" (KATEGORI MERK TIPE SN LOKASI STATUS ACTION) */
-      --asset-th-size: 18px;      /* <-- kamu minta ubah size header SEMUA ASSET */
+      /* =========================================================
+         MANUAL FONT SIZE SETTINGS (EDIT SEMUA DI SINI SAJA)
+         ========================================================= */
+
+      /* TABEL ASSET (SEMUA ASSET + RUSAK/HILANG) */
+      --asset-th-size: 18px;        /* header: KATEGORI..ACTION */
       --asset-th-letter: 8px;
-      --asset-td-size: 16px;
+      --asset-td-size: 17px;        /* value */
 
-      /* tabel kategori (kelola kategori) */
+      /* Tombol action di tabel ASSET */
+      --asset-action-btn-font: 10px;
+      --asset-action-btn-pad-y: 12px;
+      --asset-action-btn-pad-x: 30px;
+
+      /* TABEL KATEGORI (KELOLA KATEGORI) */
       --kategori-th-size: 18px;
-      --kategori-th-letter: 8px;
-      --kategori-td-size: 16px;
+      --kategori-th-letter: 6px;
+      --kategori-td-size: 18px;
 
-      /* form tambah barang + modal edit */
-      --form-field-font: 22px;
-      --form-button-font: 16px;
+      /* Tombol action di tabel KATEGORI */
+      --kategori-action-btn-font: 10px;
+      --kategori-action-btn-pad-y: 9px;
+      --kategori-action-btn-pad-x: 20px;
 
-      /* =========================
-         EXISTING SETTINGS
-         ========================= */
+      /* FORM TAMBAH BARANG + MODAL EDIT */
+      --form-field-font: 22px;       /* input/select/textarea */
+      --form-button-font: 15px;      /* tombol simpan */
+
+      /* =========================================================
+         EXISTING SETTINGS (layout)
+         ========================================================= */
       --sidebar-w: clamp(220px, 22vw, 300px);
       --pad-x: clamp(20px, 5.5vw, 100px);
       --pad-top: clamp(110px, 10vh, 140px);
@@ -50,7 +61,7 @@
       --ui-top: clamp(14px, 2.2vw, 20px);
       --ui-right: clamp(14px, 2.2vw, 20px);
 
-      /* (1) uiscale = 89% */
+      /* UI SCALE default (89%) */
       --uiScale: 0.89;
 
       /* inverse zoom factor */
@@ -124,7 +135,7 @@
       color:#000;
       padding:clamp(16px, 2.5vw, 25px) clamp(18px, 3vw, 35px);
       display:inline-block;
-      border:clamp(3px, 0.5vw, 6px) solid #000;
+      border:var(--b-mid) solid #000;
       box-shadow:12px 12px 0 #000;
     }
 
@@ -179,7 +190,7 @@
 
       background:rgba(255,255,255,0.92);
       padding:clamp(12px, 1.6vw, 16px) clamp(18px, 2.4vw, 28px);
-      border:clamp(3px, 0.5vw, 6px) solid #000;
+      border:var(--b-mid) solid #000;
       font-size:clamp(11px, 1.1vw, 13px);
       letter-spacing:clamp(3px, 0.8vw, 6px);
       font-weight:900;
@@ -196,7 +207,7 @@
 
     .logout-btn{
       background:none;
-      border:clamp(3px, 0.5vw, 6px) solid #000;
+      border:var(--b-mid) solid #000;
       padding:clamp(10px, 1.4vw, 12px) clamp(18px, 2.2vw, 28px);
       font-size:clamp(11px, 1.1vw, 13px);
       font-weight:900;
@@ -275,7 +286,7 @@
     }
     td.action-cell .btn{ margin-right:0 !important; }
 
-    /* ===== MANUAL FONT: ASSET TABLE (SEMUA ASSET + RUSAK/HILANG) ===== */
+    /* ===== MANUAL FONT: ASSET TABLE ===== */
     #assets thead th,
     #rusak thead th{
       font-size: calc(var(--asset-th-size) * var(--zoomInv));
@@ -369,6 +380,7 @@
       font-family:var(--table-font);
     }
 
+    /* BUTTONS */
     .btn{
       padding:clamp(12px, 1.8vw, 16px) clamp(26px, 5vw, 55px);
       background:#000;
@@ -387,6 +399,23 @@
       font-size:clamp(11px, 1.1vw, 13px);
     }
 
+    /* NEW: khusus tombol action tabel ASSET */
+    .btn.asset-action-btn{
+      font-size: calc(var(--asset-action-btn-font) * var(--zoomInv)) !important;
+      padding: calc(var(--asset-action-btn-pad-y) * var(--zoomInv)) calc(var(--asset-action-btn-pad-x) * var(--zoomInv)) !important;
+    }
+
+    /* NEW: khusus tombol action tabel KATEGORI */
+    .btn.kategori-action-btn{
+      font-size: calc(var(--kategori-action-btn-font) * var(--zoomInv)) !important;
+      padding: calc(var(--kategori-action-btn-pad-y) * var(--zoomInv)) calc(var(--kategori-action-btn-pad-x) * var(--zoomInv)) !important;
+    }
+
+    /* tombol delete merah */
+    .btn-danger{ background:#ff0000; }
+    .btn-danger:hover{ background:#000; }
+
+    /* MODAL */
     .modal{
       display:none;
       position:fixed;
@@ -569,6 +598,7 @@
     function applyUIScale(scale) {
       document.documentElement.style.setProperty("--uiScale", String(scale));
     }
+
     function calcAutoScale() {
       const physicalW = window.innerWidth * window.devicePixelRatio;
       const physicalH = window.innerHeight * window.devicePixelRatio;
@@ -577,17 +607,17 @@
       const sW = physicalW / targetW;
       const sH = physicalH / targetH;
 
-      /* (2) Math.min = 94% => 0.94 */
+      /* (2) Math.min = 0.94 */
       const s = Math.min(0.94, sW, sH);
 
-      /* (3) Math.max = 84% => 0.84 */
+      /* (3) Math.max = 0.84 */
       return Number(Math.max(0.84, s).toFixed(3));
     }
 
     applyUIScale(calcAutoScale());
     window.addEventListener("resize", () => applyUIScale(calcAutoScale()), { passive: true });
 
-    /* ===== inverse zoom ===== */
+    /* ===== inverse zoom factor ===== */
     const __zoomBaseDpr = window.devicePixelRatio || 1;
     function updateZoomInv() {
       const dpr = window.devicePixelRatio || 1;
@@ -636,7 +666,7 @@
       const ref = kategoriKeysRef.child(namaKey);
       const tx = await ref.transaction(current => {
         if (current === null) return kategoriId;
-        return;
+        return; /* abort */
       });
       return { committed: tx.committed, owner: tx.snapshot.val() };
     }
@@ -699,6 +729,7 @@
       }
     }
 
+    /* ===== UI helpers ===== */
     function tdText(v) {
       const td = document.createElement("td");
       td.textContent = (v === undefined || v === null) ? "" : String(v);
@@ -753,6 +784,7 @@
       });
     }
 
+    /* ===== kategori dropdown/table ===== */
     async function loadKategoriDropdown() {
       const select = $("kategori");
       const editSelect = $("editKategori");
@@ -825,9 +857,8 @@
           const wrap = document.createElement("div");
           wrap.className = "action-wrap";
 
-          const editB = makeBtn("EDIT", "btn btn-small", () => editKategori(row.id, row.nama));
-          const delB = makeBtn("DELETE", "btn btn-small", () => deleteKategori(row.id, row.nama));
-          delB.style.background = "#ff0000";
+          const editB = makeBtn("EDIT", "btn btn-small kategori-action-btn", () => editKategori(row.id, row.nama));
+          const delB = makeBtn("DELETE", "btn btn-small btn-danger kategori-action-btn", () => deleteKategori(row.id, row.nama));
 
           wrap.appendChild(editB);
           wrap.appendChild(delB);
@@ -843,6 +874,7 @@
       kategoriRef.on("value", kategoriTableHandler);
     }
 
+    /* ===== inventaris table ===== */
     function startInventarisListener() {
       const tbody = $("tableBody");
       if (!tbody) return;
@@ -886,18 +918,12 @@
             const wrap = document.createElement("div");
             wrap.className = "action-wrap";
 
-            const editB = makeBtn("EDIT", "btn", () => openEditModal(key, i));
-            editB.style.padding = "12px 30px";
-            editB.style.fontSize = "13px";
-
-            const delB = makeBtn("DELETE", "btn", async () => {
+            const editB = makeBtn("EDIT", "btn asset-action-btn", () => openEditModal(key, i));
+            const delB = makeBtn("DELETE", "btn btn-danger asset-action-btn", async () => {
               const ok = confirm("DELETE?");
               if (!ok) return;
               await inventarisRef.child(key).remove();
             });
-            delB.style.background = "#ff0000";
-            delB.style.padding = "12px 30px";
-            delB.style.fontSize = "13px";
 
             wrap.appendChild(editB);
             wrap.appendChild(delB);
@@ -915,6 +941,7 @@
       inventarisRef.on("value", inventarisHandler);
     }
 
+    /* ===== kategori CRUD ===== */
     async function addKategori() {
       if (role !== "admin") return alert("ADMIN ONLY");
 
@@ -1020,6 +1047,7 @@
       loadKategoriDropdown();
     }
 
+    /* ===== inventaris add/edit ===== */
     async function openEditModal(key, data) {
       if (role !== "admin") return;
       currentEditKey = key;
