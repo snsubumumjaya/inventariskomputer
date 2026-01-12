@@ -23,41 +23,41 @@
       --sidebar-logo-pad-x: 35px;
       --sidebar-logo-border: 6px;
 
-      --sidebar-menu-font: 20px;
+      --sidebar-menu-font: 17px;
       --sidebar-menu-letter: -0.3px;
-      --sidebar-menu-gap: 40px;          /* jarak antar menu item */
-      --sidebar-menu-underline: 40px;    /* panjang underline active/hover */
+      --sidebar-menu-gap: 30px;
+      --sidebar-menu-underline: 40px;
 
       /* USER INFO (pojok kanan atas) */
       --user-info-top: 20px;
       --user-info-right: 20px;
-      --user-info-font: 18px;
+      --user-info-font: 13px;
       --user-info-letter: 6px;
       --user-info-pad-y: 16px;
       --user-info-pad-x: 28px;
       --user-info-border: 6px;
 
       /* Tombol LOGOUT di user info */
-      --user-logout-font: 18px;
+      --user-logout-font: 13px;
       --user-logout-letter: 5px;
       --user-logout-pad-y: 12px;
       --user-logout-pad-x: 28px;
       --user-logout-border: 5px;
 
       /* TABEL ASSET (SEMUA ASSET + RUSAK/HILANG) */
-      --asset-th-size: 18px;        /* header: KATEGORI..ACTION */
+      --asset-th-size: 18px;
       --asset-th-letter: 8px;
-      --asset-td-size: 17px;        /* value */
+      --asset-td-size: 17px;
 
       /* Tombol action di tabel ASSET */
-      --asset-action-btn-font: 12px;
+      --asset-action-btn-font: 13px;
       --asset-action-btn-pad-y: 12px;
       --asset-action-btn-pad-x: 30px;
 
       /* TABEL KATEGORI (KELOLA KATEGORI) */
-      --kategori-th-size: 18px;
-      --kategori-th-letter: 8px;
-      --kategori-td-size: 17px;
+      --kategori-th-size: 13px;
+      --kategori-th-letter: 6px;
+      --kategori-td-size: 16px;
 
       /* Tombol action di tabel KATEGORI */
       --kategori-action-btn-font: 12px;
@@ -65,13 +65,12 @@
       --kategori-action-btn-pad-x: 20px;
 
       /* FORM TAMBAH BARANG + MODAL EDIT */
-      --form-field-font: 22px;       /* input/select/textarea */
-      --form-button-font: 15px;      /* tombol simpan */
+      --form-field-font: 22px;
+      --form-button-font: 15px;
 
       /* =========================================================
          EXISTING SETTINGS (layout/behavior)
          ========================================================= */
-
       --sidebar-w: clamp(220px, 22vw, 300px);
       --pad-x: clamp(20px, 5.5vw, 100px);
       --pad-top: clamp(110px, 10vh, 140px);
@@ -217,7 +216,7 @@
       padding:var(--pad-top) var(--pad-x) var(--pad-bot);
     }
 
-    /* USER INFO (manual variables) */
+    /* USER INFO */
     #userInfoBox{
       position:absolute;
       top: var(--user-info-top);
@@ -298,7 +297,7 @@
       margin-bottom:clamp(45px, 6vw, 80px);
     }
 
-    /* ===== BASE TABLE ===== */
+    /* ===== TABLE BASE ===== */
     table{
       width:100%;
       table-layout:fixed;
@@ -441,13 +440,11 @@
       font-size:clamp(11px, 1.1vw, 13px);
     }
 
-    /* khusus tombol action tabel ASSET */
     .btn.asset-action-btn{
       font-size: calc(var(--asset-action-btn-font) * var(--zoomInv)) !important;
       padding: calc(var(--asset-action-btn-pad-y) * var(--zoomInv)) calc(var(--asset-action-btn-pad-x) * var(--zoomInv)) !important;
     }
 
-    /* khusus tombol action tabel KATEGORI */
     .btn.kategori-action-btn{
       font-size: calc(var(--kategori-action-btn-font) * var(--zoomInv)) !important;
       padding: calc(var(--kategori-action-btn-pad-y) * var(--zoomInv)) calc(var(--kategori-action-btn-pad-x) * var(--zoomInv)) !important;
@@ -456,32 +453,53 @@
     .btn-danger{ background:#ff0000; }
     .btn-danger:hover{ background:#000; }
 
-    /* MODAL */
+    /* =========================================================
+       MODAL FIX (tidak kepotong):
+       - modal dipasang di luar #app (lihat HTML bawah)
+       - modal-box bisa scroll kalau konten tinggi
+       ========================================================= */
     .modal{
       display:none;
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,0.8);
-      z-index:9999;
-      align-items:center;
-      justify-content:center;
+      background:rgba(0,0,0,0.86);
+      z-index:99999;
+
+      padding:24px;
       overflow:auto;
+
+      align-items:flex-start;
+      justify-content:center;
     }
-    .modal.active{display:flex}
+    .modal.active{ display:flex; }
+
     .modal-box{
       background:#fafafa;
-      padding:clamp(40px, 6vw, 80px);
-      width:90%;
-      max-width:900px;
+      width:min(980px, 100%);
       border:var(--b-strong) solid #000;
       position:relative;
+
+      /* biar tidak kepotong di layar kecil */
+      max-height: calc(100vh - 48px);
+      overflow:auto;
+
+      /* optional: biar “feel” sama dengan UI yang di-scale */
+      transform: scale(var(--uiScale));
+      transform-origin: top center;
+
+      padding:clamp(34px, 5vw, 70px);
     }
+
     .close-modal{
       position:absolute;
-      top:clamp(18px, 3vw, 30px);
-      right:clamp(22px, 4vw, 50px);
+      top:clamp(14px, 2vw, 24px);
+      right:clamp(14px, 2vw, 24px);
       font-size:clamp(28px, 4vw, 40px);
       cursor:pointer;
+
+      /* supaya klik enak */
+      line-height:1;
+      user-select:none;
     }
   </style>
 </head>
@@ -609,27 +627,28 @@
         <div class="footer" id="footerBox">SN SUB UMUM – INTERNAL INVENTORY SYSTEM 2026</div>
       </div>
     </div>
+  </div>
 
-    <div class="modal" id="editModal">
-      <div class="modal-box">
-        <span class="close-modal" onclick="closeEditModal()">×</span>
-        <h2>EDIT<br>BARANG</h2>
-        <div class="form-box">
-          <select id="editKategori"></select>
-          <input type="text" id="editMerk" placeholder="MERK">
-          <input type="text" id="editTipe" placeholder="TIPE / SPESIFIKASI">
-          <input type="text" id="editSn" placeholder="SERIAL NUMBER (opsional)">
-          <input type="text" id="editLokasi" placeholder="LOKASI / RUANGAN">
-          <select id="editStatus">
-            <option value="OPERATIONAL">OPERATIONAL</option>
-            <option value="RUSAK">RUSAK</option>
-            <option value="PERBAIKAN">DALAM PERBAIKAN</option>
-            <option value="HILANG">HILANG</option>
-          </select>
-          <textarea id="editKeterangan" placeholder="KETERANGAN TAMBAHAN (opsional)"></textarea>
-          <br><br>
-          <button class="btn" onclick="saveEditData()">SIMPAN PERUBAHAN</button>
-        </div>
+  <!-- MODAL dipindah ke luar #app supaya tidak kepotong oleh transform -->
+  <div class="modal" id="editModal">
+    <div class="modal-box">
+      <span class="close-modal" onclick="closeEditModal()">×</span>
+      <h2>EDIT<br>BARANG</h2>
+      <div class="form-box">
+        <select id="editKategori"></select>
+        <input type="text" id="editMerk" placeholder="MERK">
+        <input type="text" id="editTipe" placeholder="TIPE / SPESIFIKASI">
+        <input type="text" id="editSn" placeholder="SERIAL NUMBER (opsional)">
+        <input type="text" id="editLokasi" placeholder="LOKASI / RUANGAN">
+        <select id="editStatus">
+          <option value="OPERATIONAL">OPERATIONAL</option>
+          <option value="RUSAK">RUSAK</option>
+          <option value="PERBAIKAN">DALAM PERBAIKAN</option>
+          <option value="HILANG">HILANG</option>
+        </select>
+        <textarea id="editKeterangan" placeholder="KETERANGAN TAMBAHAN (opsional)"></textarea>
+        <br><br>
+        <button class="btn" onclick="saveEditData()">SIMPAN PERUBAHAN</button>
       </div>
     </div>
   </div>
@@ -648,7 +667,6 @@
       const sW = physicalW / targetW;
       const sH = physicalH / targetH;
 
-      /* sesuai pembaruan sebelumnya: Math.min=0.94, Math.max=0.84 */
       const s = Math.min(0.94, sW, sH);
       return Number(Math.max(0.84, s).toFixed(3));
     }
@@ -705,7 +723,7 @@
       const ref = kategoriKeysRef.child(namaKey);
       const tx = await ref.transaction(current => {
         if (current === null) return kategoriId;
-        return; /* abort */
+        return;
       });
       return { committed: tx.committed, owner: tx.snapshot.val() };
     }
@@ -980,6 +998,77 @@
       inventarisRef.on("value", inventarisHandler);
     }
 
+    /* ===== inventaris edit modal ===== */
+    async function openEditModal(key, data) {
+      if (role !== "admin") return;
+      currentEditKey = key;
+
+      await loadKategoriDropdown();
+
+      $("editKategori").value = data.kategori || "LAINNYA";
+      $("editMerk").value = data.merk || "";
+      $("editTipe").value = data.tipe || "";
+      $("editSn").value = data.sn || "";
+      $("editLokasi").value = data.lokasi || "";
+      $("editStatus").value = data.status || "OPERATIONAL";
+      $("editKeterangan").value = data.keterangan || "";
+
+      $("editModal").classList.add("active");
+    }
+
+    function closeEditModal() {
+      $("editModal").classList.remove("active");
+      currentEditKey = null;
+    }
+
+    async function saveEditData() {
+      if (role !== "admin" || !currentEditKey) return;
+
+      const d = {
+        kategori: $("editKategori").value || "LAINNYA",
+        merk: $("editMerk").value.trim(),
+        tipe: $("editTipe").value.trim(),
+        sn: $("editSn").value.trim() || "-",
+        lokasi: $("editLokasi").value.trim(),
+        status: $("editStatus").value,
+        keterangan: $("editKeterangan").value.trim() || "-"
+      };
+
+      if (!d.merk || !d.tipe || !d.lokasi) return alert("LENGKAPI DATA!");
+
+      await inventarisRef.child(currentEditKey).update(d);
+      alert("BARANG BERHASIL DIUPDATE!");
+      closeEditModal();
+    }
+
+    async function saveData() {
+      if (role !== "admin") return alert("ADMIN ONLY");
+
+      const d = {
+        kategori: $("kategori").value || "LAINNYA",
+        merk: $("merk").value.trim(),
+        tipe: $("tipe").value.trim(),
+        sn: $("sn").value.trim() || "-",
+        lokasi: $("lokasi").value.trim(),
+        status: $("status").value,
+        keterangan: $("keterangan").value.trim() || "-",
+        tanggal_input: new Date().toISOString().split("T")[0]
+      };
+
+      if (!d.kategori || !d.merk || !d.tipe || !d.lokasi) return alert("LENGKAPI DATA!");
+
+      await inventarisRef.push(d);
+
+      alert("BARANG BERHASIL DITAMBAHKAN!");
+      $("merk").value = "";
+      $("tipe").value = "";
+      $("sn").value = "";
+      $("lokasi").value = "";
+      $("keterangan").value = "";
+
+      showPage("assets");
+    }
+
     /* ===== kategori CRUD ===== */
     async function addKategori() {
       if (role !== "admin") return alert("ADMIN ONLY");
@@ -1084,77 +1173,6 @@
 
       alert("KATEGORI DIHAPUS!");
       loadKategoriDropdown();
-    }
-
-    /* ===== inventaris add/edit ===== */
-    async function openEditModal(key, data) {
-      if (role !== "admin") return;
-      currentEditKey = key;
-
-      await loadKategoriDropdown();
-
-      $("editKategori").value = data.kategori || "LAINNYA";
-      $("editMerk").value = data.merk || "";
-      $("editTipe").value = data.tipe || "";
-      $("editSn").value = data.sn || "";
-      $("editLokasi").value = data.lokasi || "";
-      $("editStatus").value = data.status || "OPERATIONAL";
-      $("editKeterangan").value = data.keterangan || "";
-
-      $("editModal").classList.add("active");
-    }
-
-    function closeEditModal() {
-      $("editModal").classList.remove("active");
-      currentEditKey = null;
-    }
-
-    async function saveEditData() {
-      if (role !== "admin" || !currentEditKey) return;
-
-      const d = {
-        kategori: $("editKategori").value || "LAINNYA",
-        merk: $("editMerk").value.trim(),
-        tipe: $("editTipe").value.trim(),
-        sn: $("editSn").value.trim() || "-",
-        lokasi: $("editLokasi").value.trim(),
-        status: $("editStatus").value,
-        keterangan: $("editKeterangan").value.trim() || "-"
-      };
-
-      if (!d.merk || !d.tipe || !d.lokasi) return alert("LENGKAPI DATA!");
-
-      await inventarisRef.child(currentEditKey).update(d);
-      alert("BARANG BERHASIL DIUPDATE!");
-      closeEditModal();
-    }
-
-    async function saveData() {
-      if (role !== "admin") return alert("ADMIN ONLY");
-
-      const d = {
-        kategori: $("kategori").value || "LAINNYA",
-        merk: $("merk").value.trim(),
-        tipe: $("tipe").value.trim(),
-        sn: $("sn").value.trim() || "-",
-        lokasi: $("lokasi").value.trim(),
-        status: $("status").value,
-        keterangan: $("keterangan").value.trim() || "-",
-        tanggal_input: new Date().toISOString().split("T")[0]
-      };
-
-      if (!d.kategori || !d.merk || !d.tipe || !d.lokasi) return alert("LENGKAPI DATA!");
-
-      await inventarisRef.push(d);
-
-      alert("BARANG BERHASIL DITAMBAHKAN!");
-      $("merk").value = "";
-      $("tipe").value = "";
-      $("sn").value = "";
-      $("lokasi").value = "";
-      $("keterangan").value = "";
-
-      showPage("assets");
     }
 
     /* ===== autohide user info + footer show bottom ===== */
