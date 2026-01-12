@@ -11,6 +11,26 @@
 
   <style>
     :root{
+      /* =========================
+         MANUAL FONT SIZE SETTINGS
+         ========================= */
+      /* HEADER tabel "SEMUA ASSET" (KATEGORI MERK TIPE SN LOKASI STATUS ACTION) */
+      --asset-th-size: 18px;      /* <-- kamu minta ubah size header SEMUA ASSET */
+      --asset-th-letter: 8px;
+      --asset-td-size: 17px;
+
+      /* tabel kategori (kelola kategori) */
+      --kategori-th-size: 13px;
+      --kategori-th-letter: 6px;
+      --kategori-td-size: 16px;
+
+      /* form tambah barang + modal edit */
+      --form-field-font: 22px;
+      --form-button-font: 15px;
+
+      /* =========================
+         EXISTING SETTINGS
+         ========================= */
       --sidebar-w: clamp(220px, 22vw, 300px);
       --pad-x: clamp(20px, 5.5vw, 100px);
       --pad-top: clamp(110px, 10vh, 140px);
@@ -26,18 +46,18 @@
 
       --form-pad-y: clamp(40px, 5vw, 60px);
       --form-pad-x: clamp(36px, 5vw, 80px);
-      --input-font: clamp(18px, 2.2vw, 22px);
 
       --ui-top: clamp(14px, 2.2vw, 20px);
       --ui-right: clamp(14px, 2.2vw, 20px);
 
+      /* (1) uiscale = 89% */
       --uiScale: 0.89;
 
+      /* inverse zoom factor */
       --zoomInv: 1;
 
-      /* NEW: font settings for tables */
       --table-font: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      --table-value-weight: 500;  /* value ikut gaya header (lebih clean) */
+      --table-value-weight: 600;
       --table-head-weight: 900;
     }
 
@@ -75,6 +95,7 @@
       pointer-events:none;
     }
 
+    /* UI SCALE wrapper */
     #app{
       position:relative;
       transform: scale(var(--uiScale));
@@ -103,7 +124,7 @@
       color:#000;
       padding:clamp(16px, 2.5vw, 25px) clamp(18px, 3vw, 35px);
       display:inline-block;
-      border:var(--b-mid) solid #000;
+      border:clamp(3px, 0.5vw, 6px) solid #000;
       box-shadow:12px 12px 0 #000;
     }
 
@@ -158,7 +179,7 @@
 
       background:rgba(255,255,255,0.92);
       padding:clamp(12px, 1.6vw, 16px) clamp(18px, 2.4vw, 28px);
-      border:var(--b-mid) solid #000;
+      border:clamp(3px, 0.5vw, 6px) solid #000;
       font-size:clamp(11px, 1.1vw, 13px);
       letter-spacing:clamp(3px, 0.8vw, 6px);
       font-weight:900;
@@ -175,7 +196,7 @@
 
     .logout-btn{
       background:none;
-      border:var(--b-mid) solid #000;
+      border:clamp(3px, 0.5vw, 6px) solid #000;
       padding:clamp(10px, 1.4vw, 12px) clamp(18px, 2.2vw, 28px);
       font-size:clamp(11px, 1.1vw, 13px);
       font-weight:900;
@@ -183,6 +204,7 @@
       cursor:pointer;
       transition:.35s;
       white-space:nowrap;
+      font-family:var(--table-font);
     }
     .logout-btn:hover{background:#000;color:#fff}
 
@@ -205,11 +227,11 @@
       font-weight:900;
       line-height:1;
       color:#000;
-
       opacity:0;
       transform:translateY(8px);
       transition:opacity .15s linear, transform .15s linear;
       will-change:opacity, transform;
+      font-family:var(--table-font);
     }
 
     .content{display:none}
@@ -223,41 +245,28 @@
       margin-bottom:clamp(45px, 6vw, 80px);
     }
 
-    /* ===== TABLE typography upgrade ===== */
+    /* ===== BASE TABLE ===== */
     table{
       width:100%;
       table-layout:fixed;
       border-collapse:separate;
       border-spacing:0 calc(var(--row-gap) * var(--zoomInv));
-      font-family:var(--table-font); /* NEW: values ikut font header */
+      font-family:var(--table-font);
     }
     th, td{
       text-align:center;
       vertical-align:middle;
       word-break:break-word;
     }
-    th{
-      /* NEW: header bigger than values */
-      font-size: calc(clamp(12px, 1.15vw, 14px) * var(--zoomInv));
-      letter-spacing: calc(clamp(4px, 1.0vw, 7px) * var(--zoomInv));
-      font-weight: var(--table-head-weight);
-      text-transform:uppercase;
-      opacity:0.75;
-      padding-bottom: calc(22px * var(--zoomInv));
-    }
     td{
-      /* NEW: values use same font-family as table and smaller than header */
-      font-size: calc(clamp(15px, 1.45vw, 17px) * var(--zoomInv));
-      font-weight: var(--table-value-weight);
+      font-weight:var(--table-value-weight);
       padding: calc(20px * var(--zoomInv)) 0;
       border-bottom-style: solid;
       border-bottom-color: #000;
       border-bottom-width: calc(var(--b-mid) * var(--zoomInv));
     }
 
-    td.action-cell{
-      padding: calc(14px * var(--zoomInv)) 0;
-    }
+    td.action-cell{ padding: calc(14px * var(--zoomInv)) 0; }
     td.action-cell .action-wrap{
       display:flex;
       justify-content:center;
@@ -266,26 +275,64 @@
     }
     td.action-cell .btn{ margin-right:0 !important; }
 
+    /* ===== MANUAL FONT: ASSET TABLE (SEMUA ASSET + RUSAK/HILANG) ===== */
+    #assets thead th,
+    #rusak thead th{
+      font-size: calc(var(--asset-th-size) * var(--zoomInv));
+      letter-spacing: calc(var(--asset-th-letter) * var(--zoomInv));
+      font-weight: var(--table-head-weight);
+      text-transform: uppercase;
+      opacity: 0.75;
+      padding-bottom: calc(22px * var(--zoomInv));
+    }
+    #assets tbody td,
+    #rusak tbody td{
+      font-size: calc(var(--asset-td-size) * var(--zoomInv));
+    }
+
+    /* ===== MANUAL FONT: KATEGORI TABLE ===== */
+    #kelolaKategoriSection thead th{
+      font-size: calc(var(--kategori-th-size) * var(--zoomInv));
+      letter-spacing: calc(var(--kategori-th-letter) * var(--zoomInv));
+      font-weight: var(--table-head-weight);
+      text-transform: uppercase;
+      opacity: 0.75;
+      padding-bottom: calc(18px * var(--zoomInv));
+    }
+    #kelolaKategoriSection tbody td{
+      font-size: calc(var(--kategori-td-size) * var(--zoomInv));
+    }
+
+    /* ===== FORM ===== */
     .form-box{
       background:#fafafa;
       padding:var(--form-pad-y) var(--form-pad-x);
       border:var(--b-strong) solid #000;
     }
 
-    .form-box input,
-    .form-box select,
-    .form-box textarea{
+    #add .form-box input,
+    #add .form-box select,
+    #add .form-box textarea,
+    #editModal .form-box input,
+    #editModal .form-box select,
+    #editModal .form-box textarea{
       width:100%;
       padding:clamp(16px, 2vw, 20px) 0;
       background:none;
       border:none;
       border-bottom:var(--b-mid) solid #000;
-      font-size:var(--input-font);
+      font-size: calc(var(--form-field-font) * var(--zoomInv));
       margin:clamp(22px, 4vw, 40px) 0;
       outline:none;
       text-align:center;
-      font-family:var(--table-font); /* NEW: input value mengikuti font tabel */
+      font-family:var(--table-font);
       font-weight:600;
+    }
+
+    #add .form-box button.btn,
+    #editModal .form-box button.btn{
+      font-size: calc(var(--form-button-font) * var(--zoomInv));
+      font-family:var(--table-font);
     }
 
     .add-layout{
@@ -319,20 +366,20 @@
       letter-spacing:-2px;
       text-align:center;
       font-weight:900;
+      font-family:var(--table-font);
     }
 
     .btn{
       padding:clamp(12px, 1.8vw, 16px) clamp(26px, 5vw, 55px);
       background:#000;
       color:#fff;
-      font-size:clamp(12px, 1.2vw, 15px);
       font-weight:900;
       letter-spacing:clamp(3px, 0.9vw, 5px);
       border:none;
       cursor:pointer;
       transition:.35s;
       margin-right:15px;
-      font-family:var(--table-font); /* NEW */
+      font-family:var(--table-font);
     }
     .btn:hover{background:#ff0000}
     .btn-small{
@@ -525,16 +572,22 @@
     function calcAutoScale() {
       const physicalW = window.innerWidth * window.devicePixelRatio;
       const physicalH = window.innerHeight * window.devicePixelRatio;
+
       const targetW = 1920, targetH = 1080;
       const sW = physicalW / targetW;
       const sH = physicalH / targetH;
+
+      /* (2) Math.min = 94% => 0.94 */
       const s = Math.min(0.94, sW, sH);
+
+      /* (3) Math.max = 84% => 0.84 */
       return Number(Math.max(0.84, s).toFixed(3));
     }
+
     applyUIScale(calcAutoScale());
     window.addEventListener("resize", () => applyUIScale(calcAutoScale()), { passive: true });
 
-    /* ===== inverse zoom for table ===== */
+    /* ===== inverse zoom ===== */
     const __zoomBaseDpr = window.devicePixelRatio || 1;
     function updateZoomInv() {
       const dpr = window.devicePixelRatio || 1;
@@ -583,7 +636,7 @@
       const ref = kategoriKeysRef.child(namaKey);
       const tx = await ref.transaction(current => {
         if (current === null) return kategoriId;
-        return; /* abort */
+        return;
       });
       return { committed: tx.committed, owner: tx.snapshot.val() };
     }
@@ -661,7 +714,7 @@
       return b;
     }
 
-    /* ===== menu routing ===== */
+    /* ===== Menu routing ===== */
     let menuWired = false;
 
     function setActiveMenu(pageId) {
@@ -848,8 +901,8 @@
 
             wrap.appendChild(editB);
             wrap.appendChild(delB);
-            actionTd.appendChild(wrap);
 
+            actionTd.appendChild(wrap);
             tr.appendChild(actionTd);
           }
 
@@ -1037,7 +1090,7 @@
       showPage("assets");
     }
 
-    /* ===== autohide user info + footer show at bottom ===== */
+    /* ===== autohide user info + footer show bottom ===== */
     const scrollUI = {
       inited: false,
       ticking: false,
@@ -1126,13 +1179,13 @@
       $("userInfo").innerText = (userData.nama || "USER") + " – " + role.toUpperCase();
 
       if (role === "admin") {
-        $("menuAdd").style.display = "block";
-        $("aksiHeader").style.display = "table-cell";
-        $("kelolaKategoriSection").style.display = "block";
+        document.getElementById("menuAdd").style.display = "block";
+        document.getElementById("aksiHeader").style.display = "table-cell";
+        document.getElementById("kelolaKategoriSection").style.display = "block";
       } else {
-        $("menuAdd").style.display = "none";
-        $("aksiHeader").style.display = "none";
-        $("kelolaKategoriSection").style.display = "none";
+        document.getElementById("menuAdd").style.display = "none";
+        document.getElementById("aksiHeader").style.display = "none";
+        document.getElementById("kelolaKategoriSection").style.display = "none";
       }
 
       wireMenu();
@@ -1152,6 +1205,7 @@
       showPage("home");
     });
 
+    /* expose for onclick */
     window.closeEditModal = closeEditModal;
     window.saveEditData = saveEditData;
     window.saveData = saveData;
