@@ -15,18 +15,31 @@
          MANUAL SETTINGS (EDIT SEMUA DI SINI SAJA)
          ========================================================= */
 
+      /* SIDEBAR TEXT (manual) */
+      --sidebar-logo-font: 38px;
+      --sidebar-logo-letter: -3px;
+      --sidebar-logo-line: 0.95;
+      --sidebar-logo-pad-y: 25px;
+      --sidebar-logo-pad-x: 35px;
+      --sidebar-logo-border: 6px;
+
+      --sidebar-menu-font: 17px;
+      --sidebar-menu-letter: -0.3px;
+      --sidebar-menu-gap: 30px;          /* jarak antar menu item */
+      --sidebar-menu-underline: 40px;    /* panjang underline active/hover */
+
       /* USER INFO (pojok kanan atas) */
       --user-info-top: 20px;
       --user-info-right: 20px;
-      --user-info-font: 20px;
-      --user-info-letter: 8px;
+      --user-info-font: 13px;
+      --user-info-letter: 6px;
       --user-info-pad-y: 16px;
       --user-info-pad-x: 28px;
       --user-info-border: 6px;
 
       /* Tombol LOGOUT di user info */
-      --user-logout-font: 20px;
-      --user-logout-letter: 8px;
+      --user-logout-font: 13px;
+      --user-logout-letter: 5px;
       --user-logout-pad-y: 12px;
       --user-logout-pad-x: 28px;
       --user-logout-border: 5px;
@@ -58,6 +71,7 @@
       /* =========================================================
          EXISTING SETTINGS (layout/behavior)
          ========================================================= */
+
       --sidebar-w: clamp(220px, 22vw, 300px);
       --pad-x: clamp(20px, 5.5vw, 100px);
       --pad-top: clamp(110px, 10vh, 140px);
@@ -138,28 +152,34 @@
       z-index:999;
       box-shadow:50px 0 80px rgba(0,0,0,0.4);
     }
+
     .logo{margin-bottom:clamp(70px, 10vh, 120px)}
     .logo h1{
-      font-size:clamp(28px, 3.5vw, 38px);
+      font-size: calc(var(--sidebar-logo-font) * var(--zoomInv));
       font-weight:900;
-      letter-spacing:-3px;
-      line-height:0.95;
+      letter-spacing: var(--sidebar-logo-letter);
+      line-height: var(--sidebar-logo-line);
+
       background:#fff;
       color:#000;
-      padding:clamp(16px, 2.5vw, 25px) clamp(18px, 3vw, 35px);
+
+      padding: calc(var(--sidebar-logo-pad-y) * var(--zoomInv)) calc(var(--sidebar-logo-pad-x) * var(--zoomInv));
       display:inline-block;
-      border:var(--b-mid) solid #000;
+
+      border: calc(var(--sidebar-logo-border) * var(--zoomInv)) solid #000;
       box-shadow:12px 12px 0 #000;
     }
 
     .menu-item{
-      font-size:clamp(14px, 1.7vw, 17px);
+      font-size: calc(var(--sidebar-menu-font) * var(--zoomInv));
       font-weight:900;
-      letter-spacing:-0.3px;
-      margin:clamp(18px, 2.6vw, 30px) 0;
+      letter-spacing: var(--sidebar-menu-letter);
+
+      margin: calc(var(--sidebar-menu-gap) * var(--zoomInv)) 0;
       cursor:pointer;
       transition:all .35s;
       opacity:0.8;
+
       position:relative;
       padding-bottom:8px;
     }
@@ -174,7 +194,10 @@
       background:#fff;
       transition:all .35s;
     }
-    .menu-item:hover::after,.menu-item.active::after{width:40px}
+    .menu-item:hover::after,
+    .menu-item.active::after{
+      width: calc(var(--sidebar-menu-underline) * var(--zoomInv));
+    }
 
     .main{
       position:fixed;
@@ -194,7 +217,7 @@
       padding:var(--pad-top) var(--pad-x) var(--pad-bot);
     }
 
-    /* USER INFO (manual settings via variables) */
+    /* USER INFO (manual variables) */
     #userInfoBox{
       position:absolute;
       top: var(--user-info-top);
@@ -625,7 +648,7 @@
       const sW = physicalW / targetW;
       const sH = physicalH / targetH;
 
-      /* sesuai permintaan: Math.min=0.94, Math.max=0.84 */
+      /* sesuai pembaruan sebelumnya: Math.min=0.94, Math.max=0.84 */
       const s = Math.min(0.94, sW, sH);
       return Number(Math.max(0.84, s).toFixed(3));
     }
