@@ -31,7 +31,7 @@
       --ui-top: clamp(14px, 2.2vw, 20px);
       --ui-right: clamp(14px, 2.2vw, 20px);
 
-      --uiScale: 0.90;
+      --uiScale: 0.89;
 
       --zoomInv: 1;
 
@@ -528,8 +528,8 @@
       const targetW = 1920, targetH = 1080;
       const sW = physicalW / targetW;
       const sH = physicalH / targetH;
-      const s = Math.min(0.95, sW, sH);
-      return Number(Math.max(0.85, s).toFixed(3));
+      const s = Math.min(0.94, sW, sH);
+      return Number(Math.max(0.84, s).toFixed(3));
     }
     applyUIScale(calcAutoScale());
     window.addEventListener("resize", () => applyUIScale(calcAutoScale()), { passive: true });
