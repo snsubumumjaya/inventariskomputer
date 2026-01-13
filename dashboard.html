@@ -23,7 +23,8 @@
       --sidebar-logo-pad-x: 35px;
       --sidebar-logo-border: 6px;
 
-      --sidebar-menu-font: 17px;
+      /* (1) sidebar txt menu font = 20 */
+      --sidebar-menu-font: 20px;
       --sidebar-menu-letter: -0.3px;
       --sidebar-menu-gap: 30px;
       --sidebar-menu-underline: 40px;
@@ -31,31 +32,42 @@
       /* USER INFO (pojok kanan atas) */
       --user-info-top: 20px;
       --user-info-right: 20px;
-      --user-info-font: 13px;
+
+      /* (2) user info font = 18 */
+      --user-info-font: 18px;
+
       --user-info-letter: 6px;
       --user-info-pad-y: 16px;
       --user-info-pad-x: 28px;
       --user-info-border: 6px;
 
       /* Tombol LOGOUT di user info */
-      --user-logout-font: 13px;
+      /* (3) tombol logout font = 16 */
+      --user-logout-font: 16px;
+
       --user-logout-letter: 5px;
       --user-logout-pad-y: 12px;
       --user-logout-pad-x: 28px;
       --user-logout-border: 5px;
 
       /* TABEL ASSET (SEMUA ASSET + RUSAK/HILANG) */
-      --asset-th-size: 18px;
+      /* (4) tabel asset th-size = 20 */
+      --asset-th-size: 20px;
+
       --asset-th-letter: 8px;
       --asset-td-size: 17px;
 
       /* Tombol action di tabel ASSET */
-      --asset-action-btn-font: 13px;
+      /* (5) tombol action asset btn-font = 12 */
+      --asset-action-btn-font: 12px;
+
       --asset-action-btn-pad-y: 12px;
       --asset-action-btn-pad-x: 30px;
 
       /* TABEL KATEGORI (KELOLA KATEGORI) */
-      --kategori-th-size: 13px;
+      /* (6) tabel kategori th-size = 20 */
+      --kategori-th-size: 20px;
+
       --kategori-th-letter: 6px;
       --kategori-td-size: 16px;
 
@@ -67,6 +79,11 @@
       /* FORM TAMBAH BARANG + MODAL EDIT */
       --form-field-font: 22px;
       --form-button-font: 15px;
+
+      /* Modal edit: jarak antar field (biar tidak scroll) */
+      --modal-gap: 18px;
+      --modal-field-margin-y: 14px;
+      --modal-textarea-minh: 110px;
 
       /* =========================================================
          EXISTING SETTINGS (layout/behavior)
@@ -87,7 +104,7 @@
       --form-pad-y: clamp(40px, 5vw, 60px);
       --form-pad-x: clamp(36px, 5vw, 80px);
 
-      /* UI SCALE default (89%) */
+      /* UI SCALE */
       --uiScale: 0.89;
 
       /* inverse zoom factor */
@@ -158,13 +175,10 @@
       font-weight:900;
       letter-spacing: var(--sidebar-logo-letter);
       line-height: var(--sidebar-logo-line);
-
       background:#fff;
       color:#000;
-
       padding: calc(var(--sidebar-logo-pad-y) * var(--zoomInv)) calc(var(--sidebar-logo-pad-x) * var(--zoomInv));
       display:inline-block;
-
       border: calc(var(--sidebar-logo-border) * var(--zoomInv)) solid #000;
       box-shadow:12px 12px 0 #000;
     }
@@ -173,14 +187,13 @@
       font-size: calc(var(--sidebar-menu-font) * var(--zoomInv));
       font-weight:900;
       letter-spacing: var(--sidebar-menu-letter);
-
       margin: calc(var(--sidebar-menu-gap) * var(--zoomInv)) 0;
       cursor:pointer;
       transition:all .35s;
       opacity:0.8;
-
       position:relative;
       padding-bottom:8px;
+      font-family:var(--table-font);
     }
     .menu-item:hover,.menu-item.active{opacity:1}
     .menu-item::after{
@@ -223,20 +236,16 @@
       right: var(--user-info-right);
       z-index:5000;
       pointer-events:auto;
-
       background:rgba(255,255,255,0.92);
       padding: calc(var(--user-info-pad-y) * var(--zoomInv)) calc(var(--user-info-pad-x) * var(--zoomInv));
       border: calc(var(--user-info-border) * var(--zoomInv)) solid #000;
-
       font-size: calc(var(--user-info-font) * var(--zoomInv));
       letter-spacing: calc(var(--user-info-letter) * var(--zoomInv));
       font-weight:900;
-
       display:flex;
       align-items:center;
       gap:clamp(14px, 2vw, 24px);
       max-width:calc(100vw - var(--sidebar-w) - (var(--pad-x) * 2));
-
       opacity:1;
       transform:translateY(0);
       transition:opacity .08s linear, transform .08s linear;
@@ -247,11 +256,9 @@
     .logout-btn{
       background:none;
       border: calc(var(--user-logout-border) * var(--zoomInv)) solid #000;
-
       padding: calc(var(--user-logout-pad-y) * var(--zoomInv)) calc(var(--user-logout-pad-x) * var(--zoomInv));
       font-size: calc(var(--user-logout-font) * var(--zoomInv));
       letter-spacing: calc(var(--user-logout-letter) * var(--zoomInv));
-
       font-weight:900;
       cursor:pointer;
       transition:.35s;
@@ -295,9 +302,10 @@
       letter-spacing:-6px;
       line-height:0.95;
       margin-bottom:clamp(45px, 6vw, 80px);
+      font-family:var(--table-font);
     }
 
-    /* ===== TABLE BASE ===== */
+    /* ===== BASE TABLE ===== */
     table{
       width:100%;
       table-layout:fixed;
@@ -364,10 +372,7 @@
 
     #add .form-box input,
     #add .form-box select,
-    #add .form-box textarea,
-    #editModal .form-box input,
-    #editModal .form-box select,
-    #editModal .form-box textarea{
+    #add .form-box textarea{
       width:100%;
       padding:clamp(16px, 2vw, 20px) 0;
       background:none;
@@ -381,8 +386,7 @@
       font-weight:600;
     }
 
-    #add .form-box button.btn,
-    #editModal .form-box button.btn{
+    #add .form-box button.btn{
       font-size: calc(var(--form-button-font) * var(--zoomInv));
       font-family:var(--table-font);
     }
@@ -454,9 +458,7 @@
     .btn-danger:hover{ background:#000; }
 
     /* =========================================================
-       MODAL FIX (tidak kepotong):
-       - modal dipasang di luar #app (lihat HTML bawah)
-       - modal-box bisa scroll kalau konten tinggi
+       MODAL (EDIT BARANG) - dibuat menyamping (2 kolom)
        ========================================================= */
     .modal{
       display:none;
@@ -475,19 +477,17 @@
 
     .modal-box{
       background:#fafafa;
-      width:min(980px, 100%);
+      width:min(1100px, 100%);
       border:var(--b-strong) solid #000;
       position:relative;
 
-      /* biar tidak kepotong di layar kecil */
       max-height: calc(100vh - 48px);
       overflow:auto;
 
-      /* optional: biar “feel” sama dengan UI yang di-scale */
       transform: scale(var(--uiScale));
       transform-origin: top center;
 
-      padding:clamp(34px, 5vw, 70px);
+      padding:clamp(28px, 4vw, 60px);
     }
 
     .close-modal{
@@ -496,10 +496,56 @@
       right:clamp(14px, 2vw, 24px);
       font-size:clamp(28px, 4vw, 40px);
       cursor:pointer;
-
-      /* supaya klik enak */
       line-height:1;
       user-select:none;
+    }
+
+    /* Form edit: 2 kolom */
+    #editModal .form-box.edit-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--modal-gap);
+      align-items:start;
+    }
+
+    /* Field dalam modal: rapat + tidak terlalu tinggi */
+    #editModal .form-box.edit-grid input,
+    #editModal .form-box.edit-grid select,
+    #editModal .form-box.edit-grid textarea{
+      width:100%;
+      padding:14px 0;
+      background:none;
+      border:none;
+      border-bottom:var(--b-mid) solid #000;
+      font-size: calc(var(--form-field-font) * var(--zoomInv));
+      margin: 0;
+      outline:none;
+      text-align:center;
+      font-family:var(--table-font);
+      font-weight:600;
+    }
+
+    #editModal .form-box.edit-grid textarea{
+      grid-column: 1 / -1;
+      min-height: var(--modal-textarea-minh);
+      resize: vertical;
+    }
+
+    #editModal .form-box.edit-grid button.btn{
+      grid-column: 1 / -1;
+      justify-self:center;
+      font-size: calc(var(--form-button-font) * var(--zoomInv));
+    }
+
+    /* Responsif: jika layar sempit, jadi 1 kolom */
+    @media (max-width: 900px){
+      #editModal .form-box.edit-grid{
+        grid-template-columns: 1fr;
+      }
+      #editModal .form-box.edit-grid textarea,
+      #editModal .form-box.edit-grid button.btn{
+        grid-column: 1 / 2;
+      }
     }
   </style>
 </head>
@@ -629,16 +675,18 @@
     </div>
   </div>
 
-  <!-- MODAL dipindah ke luar #app supaya tidak kepotong oleh transform -->
+  <!-- MODAL di luar #app -->
   <div class="modal" id="editModal">
     <div class="modal-box">
       <span class="close-modal" onclick="closeEditModal()">×</span>
       <h2>EDIT<br>BARANG</h2>
-      <div class="form-box">
+      <div class="form-box edit-grid">
         <select id="editKategori"></select>
         <input type="text" id="editMerk" placeholder="MERK">
+
         <input type="text" id="editTipe" placeholder="TIPE / SPESIFIKASI">
         <input type="text" id="editSn" placeholder="SERIAL NUMBER (opsional)">
+
         <input type="text" id="editLokasi" placeholder="LOKASI / RUANGAN">
         <select id="editStatus">
           <option value="OPERATIONAL">OPERATIONAL</option>
@@ -646,8 +694,9 @@
           <option value="PERBAIKAN">DALAM PERBAIKAN</option>
           <option value="HILANG">HILANG</option>
         </select>
+
         <textarea id="editKeterangan" placeholder="KETERANGAN TAMBAHAN (opsional)"></textarea>
-        <br><br>
+
         <button class="btn" onclick="saveEditData()">SIMPAN PERUBAHAN</button>
       </div>
     </div>
@@ -713,7 +762,7 @@
 
     function $(id) { return document.getElementById(id); }
 
-    /* ===== kategori unique (anti duplikat 100%) ===== */
+    /* ===== kategori unique ===== */
     function normalizeKategoriKey(s) {
       const norm = String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
       return norm.replace(/[.#$\[\]\/]/g, "_").slice(0, 80);
